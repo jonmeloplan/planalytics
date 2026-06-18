@@ -582,6 +582,10 @@
     .ceo-badge.adm { background: #dbeafe; color: #1e40af; }
     .ceo-badge.viz { background: #f0fdf4; color: #166534; }
 
+    /* === TELA DE REDEFINIÇÃO DE SENHA === */
+    .reset-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#07143f 0%,#075be8 100%); display:none; align-items:center; justify-content:center; z-index:9999; }
+    .reset-overlay.ativo { display:flex; }
+
     /* === TELA DE PRIMEIRO ACESSO === */
     .primeiro-acesso-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#07143f 0%,#075be8 100%); display:none; align-items:center; justify-content:center; z-index:9999; }
     .primeiro-acesso-overlay.ativo { display:flex; }
@@ -701,6 +705,27 @@
       <button class="top-btn primary" type="submit">Salvar</button>
     </div>
   </form>
+</div>
+
+<!-- Tela de Redefinição de Senha (via link do e-mail) -->
+<div id="resetOverlay" class="reset-overlay">
+  <div class="primeiro-acesso-box">
+    <div class="login-logo">PLAN<span>ALYTICS</span></div>
+    <h2 style="margin-top:1rem">Redefinir senha</h2>
+    <p>Digite sua nova senha para continuar.</p>
+    <div class="login-error" id="resetError"></div>
+    <div class="login-field">
+      <label>Nova senha</label>
+      <input type="password" id="resetNovaSenha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="login-field">
+      <label>Confirmar senha</label>
+      <input type="password" id="resetConfirmarSenha" placeholder="Repita a senha"
+        onkeydown="if(event.key==='Enter') salvarSenhaReset()">
+    </div>
+    <button class="login-btn" onclick="salvarSenhaReset()">Salvar nova senha</button>
+    <div class="login-loading" id="resetLoading" style="display:none">Salvando...</div>
+  </div>
 </div>
 
 <!-- Tela de Primeiro Acesso -->
@@ -2554,6 +2579,62 @@ function importarBackupPlanalytics(event) {
 
 /* ─── 16B. AUTENTICAÇÃO E PERFIS ─── */
 
+async function verificarRedefinicaoSenha() {
+  // Verifica se a URL tem código de redefinição de senha
+  const hash = window.location.hash;
+  const params = new URLSearchParams(hash.replace('#', '?'));
+  const type = params.get('type');
+  const accessToken = params.get('access_token');
+
+  if(type === 'recovery' && accessToken) {
+    // Define a sessão com o token recebido
+    const { error } = await sb.auth.setSession({
+      access_token: accessToken,
+      refresh_token: params.get('refresh_token') || ''
+    });
+    if(!error) {
+      $('resetOverlay').classList.add('ativo');
+      // Limpa a URL para não expor o token
+      history.replaceState(null, '', window.location.pathname);
+      return true;
+    }
+  }
+  return false;
+}
+
+async function salvarSenhaReset() {
+  const nova     = $('resetNovaSenha').value;
+  const confirma = $('resetConfirmarSenha').value;
+  const errEl    = $('resetError');
+  errEl.style.display = 'none';
+
+  if(!nova || nova.length < 6) {
+    errEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(nova !== confirma) {
+    errEl.textContent = 'As senhas não coincidem.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  $('resetLoading').style.display = 'block';
+  const { error } = await sb.auth.updateUser({ password: nova });
+  if(error) {
+    errEl.textContent = 'Erro: ' + error.message;
+    errEl.style.display = 'block';
+    $('resetLoading').style.display = 'none';
+    return;
+  }
+
+  $('resetOverlay').classList.remove('ativo');
+  $('resetLoading').style.display = 'none';
+  alert('Senha redefinida com sucesso! Faça login com a nova senha.');
+  await sb.auth.signOut();
+  $('loginOverlay').style.display = 'flex';
+}
+
 async function salvarNovaSenha() {
   const nova    = $('paNovaSenha').value;
   const confirma = $('paConfirmarSenha').value;
@@ -2958,6 +3039,10 @@ function selecionarEmpresaNoApp(empresaId) {
 window.addEventListener('DOMContentLoaded', async () => {
   // Fechar modal ao clicar no fundo
   $('modalBg').addEventListener('click', e => { if(e.target === $('modalBg')) fecharModal(); });
+
+  // Verifica se a URL tem código de redefinição de senha
+  const isReset = await verificarRedefinicaoSenha();
+  if(isReset) return;
 
   // Verifica se já tem sessão ativa (recarregou a página)
   const { data: { session } } = await sb.auth.getSession();
