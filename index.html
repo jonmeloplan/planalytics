@@ -656,7 +656,7 @@
       <div class="tree-title" onclick="abrirPortfolio()">
         <span id="portfolioArrow" class="arrow" onclick="togglePortfolio(event)">▼</span>
         <span class="folder">📁</span>
-        <span>Portfólio</span>
+        <span>Portfólio <span id="portfolioEmpresaLabel" style="font-size:.75rem;font-weight:400;opacity:.7"></span></span>
       </div>
       <div id="portfolioContent"></div>
     </aside>
@@ -2774,10 +2774,15 @@ async function iniciarSessao(user) {
     }
   });
 
+  // Carrega lista de empresas (necessário para todos os perfis)
+  const { data: empData } = await sb.rpc('get_todas_empresas');
+  if(empData) _todasEmpresas = empData;
   // Carrega seletor de empresas para CEO
   await carregarSeletorEmpresas();
   // Mostra botão do Painel CEO
   document.querySelectorAll('.ceo-only').forEach(el => el.style.display = perfil.perfil === 'CEO' ? '' : 'none');
+  // Atualiza label do portfólio com nome da empresa
+  atualizarLabelPortfolio();
 
   // Oculta login e mostra app
   $('loginOverlay').style.display = 'none';
@@ -2815,6 +2820,22 @@ async function fazerLogout() {
 
 function podeEditar() { return usuarioAtual && (usuarioAtual.perfil === 'CEO' || usuarioAtual.perfil === 'ADM'); }
 
+function atualizarLabelPortfolio() {
+  const el = $('portfolioEmpresaLabel');
+  if(!el) return;
+  if(!usuarioAtual) { el.textContent = ''; return; }
+  if(usuarioAtual.perfil === 'CEO') {
+    // CEO — mostra empresa selecionada no seletor
+    const sel = $('empresaSelect');
+    const nomeEmp = sel ? sel.options[sel.selectedIndex]?.text : '';
+    el.textContent = nomeEmp ? '— ' + nomeEmp : '';
+  } else {
+    // ADM/Visualizador — mostra empresa do próprio usuário
+    const emp = _todasEmpresas.find(e => e.id === usuarioAtual.empresa_id);
+    el.textContent = emp ? '— ' + emp.nome : '';
+  }
+}
+
 /* ─── SELETOR DE EMPRESAS (CEO) ─── */
 async function carregarSeletorEmpresas() {
   console.log('[CEO] perfil:', usuarioAtual?.perfil);
@@ -2845,6 +2866,7 @@ async function trocarEmpresa(empresaId) {
   salvarLocal();
   abrirPortfolio();
   renderizarArvore();
+  atualizarLabelPortfolio();
 }
 
 /* ─── 16C. PAINEL CEO ─── */
