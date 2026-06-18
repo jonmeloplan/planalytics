@@ -370,8 +370,8 @@
     .pf-legend i { display: inline-block; }
     .pf-legend .legend-dot { width: 14px; height: 14px; border-radius: 999px; background: #fff; border: 3px solid currentColor; }
     .pf-legend .previsto { color: #2563eb; }
-    .pf-legend .real { color: #ef4444; }
-    .pf-legend .tendencia { color: #16a34a; }
+    .pf-legend .real { color: #16a34a; }
+    .pf-legend .tendencia { color: #eab308; }
     .pf-legend .bar { width: 14px; height: 14px; border-radius: 4px; }
     .pf-legend .bar.prev { background: rgba(37,99,235,.35); }
     .pf-legend .bar.real { background: rgba(239,68,68,.30); }
@@ -382,11 +382,11 @@
     .pf-axis-title { font-size: 13px; fill: #0f172a; font-weight: 900; }
     .pf-line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     .pf-previsto { stroke: #2563eb; }
-    .pf-real { stroke: #ef4444; }
-    .pf-tendencia { stroke: #16a34a; stroke-dasharray: 7 7; }
+    .pf-real { stroke: #16a34a; }
+    .pf-tendencia { stroke: #eab308; stroke-dasharray: 7 7; }
     .pf-previsto-dot { fill: #2563eb; stroke: #fff; stroke-width: 1.5; }
-    .pf-real-dot { fill: #ef4444; stroke: #fff; stroke-width: 1.5; }
-    .pf-tendencia-dot { fill: #16a34a; stroke: #fff; stroke-width: 1.5; }
+    .pf-real-dot { fill: #16a34a; stroke: #fff; stroke-width: 1.5; }
+    .pf-tendencia-dot { fill: #eab308; stroke: #fff; stroke-width: 1.5; }
     .pf-bar-prev { fill: rgba(37,99,235,.35); }
     .pf-bar-real { fill: rgba(239,68,68,.35); }
 
@@ -1791,7 +1791,7 @@ function renderGraficoPerformanceFisica(o) {
     const d=dados[ultimoRealIndex], x=xPos(ultimoRealIndex), p=d.previsto, r=d.real;
     const yR=yPct(r), yP=(p!==null&&!isNaN(p))?yPct(p):null;
     const labelRealY=Math.max(padT+14,yR-14), labelPrevY=yP!==null?Math.max(padT+14,yP-14):null;
-    return `${yP!==null?`<circle cx="${x}" cy="${yP}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"><title>Último Prev: ${fmtPct(p)}</title></circle>`:''}<circle cx="${x}" cy="${yR}" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="3"><title>Último Real: ${fmtPct(r)}</title></circle>${yP!==null?`<text x="${x}" y="${labelPrevY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#2563eb">${fmtPct(p)}</text>`:''}<text x="${x}" y="${labelRealY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#ef4444">${fmtPct(r)}</text>`;
+    return `${yP!==null?`<circle cx="${x}" cy="${yP}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"><title>Último Prev: ${fmtPct(p)}</title></circle>`:''}<circle cx="${x}" cy="${yR}" r="8" fill="#16a34a" stroke="#ffffff" stroke-width="3"><title>Último Real: ${fmtPct(r)}</title></circle>${yP!==null?`<text x="${x}" y="${labelPrevY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#2563eb">${fmtPct(p)}</text>`:''}<text x="${x}" y="${labelRealY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#16a34a">${fmtPct(r)}</text>`;
   })() : '';
 
   return `<div class="pf-chart-wrap">
@@ -2009,7 +2009,7 @@ function renderGraficoPerformanceFinanceira(o) {
     const d=dados[ultimoRealIdx], x=xPos(ultimoRealIdx), p=d.previsto, r=d.real;
     const yR=yPct(r), yP=(p!==null&&!isNaN(p))?yPct(p):null;
     const labelRealY=Math.max(padT+14,yR-14), labelPrevY=yP!==null?Math.max(padT+14,yP-14):null;
-    return `${yP!==null?`<circle cx="${x}" cy="${yP}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"><title>Último Prev: ${fmtP(p)}</title></circle>`:''}<circle cx="${x}" cy="${yR}" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="3"><title>Último Real: ${fmtP(r)}</title></circle>${yP!==null?`<text x="${x}" y="${labelPrevY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#2563eb">${fmtP(p)}</text>`:''}<text x="${x}" y="${labelRealY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#ef4444">${fmtP(r)}</text>`;
+    return `${yP!==null?`<circle cx="${x}" cy="${yP}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"><title>Último Prev: ${fmtP(p)}</title></circle>`:''}<circle cx="${x}" cy="${yR}" r="8" fill="#16a34a" stroke="#ffffff" stroke-width="3"><title>Último Real: ${fmtP(r)}</title></circle>${yP!==null?`<text x="${x}" y="${labelPrevY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#2563eb">${fmtP(p)}</text>`:''}<text x="${x}" y="${labelRealY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#16a34a">${fmtP(r)}</text>`;
   })() : '';
 
   return `<div class="pf-chart-wrap">
