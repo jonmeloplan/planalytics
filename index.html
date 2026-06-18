@@ -2194,21 +2194,49 @@ async function gerarAnaliseIA(uid) {
   body.innerHTML = '<div class="ia-loading"><span class="ia-spinner"></span> A IA está processando os dados da obra…</div>';
 
   const contexto = coletarContextoObra(o);
-  const prompt = `Você é um especialista sênior em planejamento e controle de projetos industriais e de construção civil, com profundo conhecimento em cronogramas, caminho crítico, EVM e gestão de riscos. Analise os dados abaixo e forneça um relatório gerencial estruturado:
+  const prompt = `Você é um especialista sênior em planejamento e controle de projetos industriais — petróleo & gás, mineração, infraestrutura e construção pesada — com domínio em cronogramas, caminho crítico (CPM), Earned Value Management (EVM), gestão de interfaces entre disciplinas e análise de riscos de prazo e custo.
 
-1. **DIAGNÓSTICO GERAL** — Situação atual da obra em 3-4 frases objetivas. Inclua o desvio de prazo e físico de forma clara.
+Analise os dados abaixo e produza um relatório gerencial estruturado e direto ao ponto. O cronograma é organizado por disciplinas típicas de projetos industriais: **Civil**, **Tubulação**, **Elétrica** e **Instrumentação**. Considere essa estrutura ao analisar os pacotes de trabalho.
 
-2. **CAMINHO CRÍTICO E ATIVIDADES DE RISCO** — Com base nas atividades em atraso e em andamento, identifique quais representam maior risco ao prazo final. Aponte a EAP, descrição e impacto estimado em dias. Priorize as mais críticas.
+---
 
-3. **ANÁLISE DE DESVIOS** — Desvios de prazo, físico e financeiro. Para cada desvio, informe: magnitude, causa provável e impacto no término da obra.
+## 1. DIAGNÓSTICO EXECUTIVO
+Situação atual da obra em 4-5 frases. Informe claramente: avanço físico previsto vs. real, desvio em percentual e em dias, e se a obra está adiantada, no prazo ou atrasada. Mencione a disciplina com maior impacto no momento.
 
-4. **ATIVIDADES PRIORITÁRIAS — PRÓXIMOS 30 DIAS** — Liste as atividades que precisam de atenção imediata para não comprometer o cronograma. Seja específico sobre o que precisa ser feito.
+## 2. CAMINHO CRÍTICO — ANÁLISE POR DISCIPLINA
+Para cada disciplina presente no cronograma (Civil, Tubulação, Elétrica, Instrumentação), avalie citando os **pacotes de trabalho pelo nome exato** como aparecem no cronograma (ex: "Construção da Pavimentação de Concreto", "Fabricação de Tubulações", "Montagem do Painel Elétrico"):
+- Pacotes identificados na disciplina e sua situação (% previsto vs. % real)
+- Se a disciplina está no caminho crítico ou subcrítico
+- Pacote com maior risco de atraso, citando o nome
+- Impacto estimado no prazo final (em dias)
 
-5. **PLANOS DE AÇÃO** — Para cada problema identificado, sugira ações concretas, priorizadas e com responsável sugerido (Engenheiro, Equipe, Cliente).
+Priorize as disciplinas com maior risco. Se uma disciplina não constar nos dados, ignore-a. **Nunca generalize — use os nomes reais dos pacotes do cronograma.**
 
-6. **PREVISÃO DE TENDÊNCIA** — Se mantido o ritmo atual, qual será o término real estimado? A obra está no caminho de cumprir o prazo?
+## 3. PACOTES DE TRABALHO EM ALERTA
+Liste os pacotes de trabalho em atraso ou risco iminente, citando o **nome exato do pacote** como consta no cronograma. Para cada um:
+- Nome exato do pacote (conforme cronograma)
+- Disciplina a que pertence
+- Desvio atual (dias ou %)
+- Consequência se não recuperado
+- Interdependência com outras disciplinas
 
-Use linguagem gerencial, direta e objetiva. Seja específico com os dados fornecidos. Use markdown com cabeçalhos e listas.
+## 4. FRENTES PRIORITÁRIAS — PRÓXIMOS 30 DIAS
+Quais frentes de trabalho precisam de mobilização imediata? Seja específico: que recurso, que ação, que prazo interno. Considere as atividades próximas a iniciar e as em andamento com maior atraso.
+
+## 5. PLANOS DE AÇÃO
+Para cada risco ou desvio crítico identificado, defina:
+- Ação corretiva concreta
+- Responsável sugerido (Engenheiro Responsável, Equipe de Campo, Gestão, Cliente/Fiscalização)
+- Prazo para implementação
+
+## 6. TENDÊNCIA E PREVISÃO DE TÉRMINO
+Com base no ritmo atual de avanço, estime:
+- Data provável de término real
+- Desvio esperado em relação à linha de base
+- Se o ritmo for mantido, a obra entrega no prazo? Se não, quantos dias de atraso?
+
+---
+Use linguagem gerencial, objetiva e técnica. Evite generalidades — seja específico com os dados fornecidos. Não repita informações entre seções. Use markdown com cabeçalhos (##) e listas.
 
 ${contexto}`;
 
