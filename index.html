@@ -1993,12 +1993,13 @@ function renderGraficoPerformanceFinanceira(o) {
   const barras = dados.map((d,i)=>{
     const x=xPos(i);
     const hp=yRS(d.rsPrevisto), hr=yRS(d.rsReal), ht=d.rsTendencia?yRS(d.rsTendencia):null;
-    return `<rect class="pf-bar-prev" x="${x-barW-2}" y="${hp}" width="${barW}" height="${baseY-hp}" rx="2"><title>R$ Prev: ${moeda(d.rsPrevisto)}</title></rect>
-      <rect class="pf-bar-real" x="${x+2}" y="${hr}" width="${barW}" height="${baseY-hr}" rx="2"><title>R$ Real: ${moeda(d.rsReal)}</title></rect>
-      ${ht?`<rect x="${x+barW+4}" y="${ht}" width="${barW}" height="${baseY-ht}" fill="rgba(34,197,94,.35)" rx="2"><title>R$ Tend: ${moeda(d.rsTendencia)}</title></rect>`:''}`;
+    // Só renderiza barra se tiver valor válido e positivo
+    const prevBar = (d.rsPrevisto && d.rsPrevisto > 0 && hp < baseY) ? `<rect class="pf-bar-prev" x="${x-barW/2-1}" y="${hp}" width="${barW}" height="${baseY-hp}" rx="2"><title>R$ Prev: ${moeda(d.rsPrevisto)}</title></rect>` : '';
+    const realBar = (d.rsReal && d.rsReal > 0 && hr < baseY) ? `<rect class="pf-bar-real" x="${x+barW/2+1}" y="${hr}" width="${barW}" height="${baseY-hr}" rx="2"><title>R$ Real: ${moeda(d.rsReal)}</title></rect>` : '';
+    return prevBar + realBar;
   }).join('');
 
-  const pctGrid = [0,20,40,60,80,100].map(v=>`<line x1="${padL}" y1="${yPct(v)}" x2="${w-padR}" y2="${yPct(v)}" class="pf-grid"/><text x="${padL-10}" y="${yPct(v)+4}" text-anchor="end" class="pf-axis-label">${v}</text>`).join('');
+  const pctGrid = [0,10,20,30,40,50,60,70,80,90,100].map(v=>`<line x1="${padL}" y1="${yPct(v)}" x2="${w-padR}" y2="${yPct(v)}" class="pf-grid"/><text x="${padL-10}" y="${yPct(v)+4}" text-anchor="end" class="pf-axis-label">${v}</text>`).join('');
   const rsGrid = [0,.2,.4,.6,.8,1].map(f=>{ const v=maxRS*f; return `<text x="${w-padR+10}" y="${yRS(v)+4}" class="pf-axis-label">${fmtM(v)}</text>`; }).join('');
   const labels = dados.map((d,i)=>{ const s=(d.data||'').slice(5)||d.data; return `<text x="${xPos(i)}" y="${h-28}" text-anchor="end" transform="rotate(-50 ${xPos(i)} ${h-28})" class="pf-axis-label">${s}</text>`; }).join('');
 
