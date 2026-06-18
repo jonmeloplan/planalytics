@@ -1,0 +1,2973 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planalytics</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ============================================================
+       PLANALYTICS v3.0 — CSS UNIFICADO
+       ============================================================ */
+
+    /* === TOKENS GLOBAIS === */
+    :root {
+      --topbar-h: 4rem;
+      --gap: .5rem;
+      --sidebar-w: clamp(17rem, 25vw, 24rem);
+      --blue: #075be8;
+      --dark: #07143f;
+    }
+
+    /* === RESET BÁSICO === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    html, body { width: 100%; min-height: 100vh; overflow-x: hidden; background: #eef5fc; color: var(--dark); }
+    body { font-size: clamp(.82rem, .8vw, .95rem); }
+
+    /* === LAYOUT RAIZ === */
+    .app-root { width: 100%; min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
+
+    /* === TOPBAR === */
+    .topbar {
+      height: var(--topbar-h);
+      min-height: var(--topbar-h);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: clamp(.6rem, 1.5vw, 1.4rem);
+      padding: 0 clamp(.8rem, 1.6vw, 1.4rem);
+      background: linear-gradient(#f8fbff, #e6f0fa);
+      border-bottom: 1px solid #c5d6e8;
+      overflow: hidden;
+    }
+    .logo { font-size: clamp(1.35rem, 2.2vw, 1.8rem); font-weight: 900; letter-spacing: .12rem; white-space: nowrap; }
+    .logo-plan { color: #07143f; }
+    .logo-analytics { color: #075be8; }
+    .top-btn {
+      height: 2.65rem;
+      padding: 0 clamp(.75rem, 1.5vw, 1.25rem);
+      border: 0;
+      border-radius: .5rem;
+      font-size: clamp(.85rem, 1vw, 1rem);
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .top-btn.settings { background: transparent; color: var(--dark); }
+    .top-btn.primary { background: var(--blue); color: white; box-shadow: 0 .5rem 1.25rem rgba(0,70,180,.22); }
+    .top-btn.danger { background: #dc2626; color: white; }
+    .user-area { margin-left: auto; font-size: clamp(1.4rem, 2vw, 1.75rem); white-space: nowrap; }
+
+    /* === LAYOUT PRINCIPAL === */
+    .layout { width: 100%; flex: 1; min-height: 0; display: flex; padding: var(--gap); gap: var(--gap); overflow: hidden; }
+
+    /* === SIDEBAR === */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex: 0 0 var(--sidebar-w);
+      max-width: 32vw;
+      min-width: 16rem;
+      background: rgba(255,255,255,.88);
+      border: 1px solid #c7d9ea;
+      border-radius: .5rem;
+      box-shadow: 0 .5rem 1.4rem rgba(15,23,42,.08);
+      padding: clamp(1rem,2vh,1.5rem) .6rem;
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .tree-title, .tree-line { display: flex; align-items: center; gap: .55rem; border-radius: .4rem; }
+    .tree-title { min-height: 2.8rem; font-size: clamp(1.1rem,1.5vw,1.4rem); font-weight: 800; padding: 0 .6rem; cursor: pointer; }
+    .tree-line { min-height: 2.35rem; padding: 0 .55rem 0 calc(.55rem + var(--level,0)*1rem); font-size: clamp(.8rem,1vw,.95rem); color: #061445; cursor: pointer; overflow: hidden; }
+    .tree-line:hover, .tree-line.active { background: #d7eaff; color: #0054df; font-weight: 700; }
+    .tree-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .folder { font-size: 1.25rem; color: #f2a900; flex: 0 0 auto; }
+    .fileicon { font-size: 1.15rem; color: #1d4ed8; flex: 0 0 auto; }
+    .arrow { font-size: .9rem; width: 1rem; flex: 0 0 auto; text-align: center; cursor: pointer; }
+    .status-dot { width: .62rem; height: .62rem; border-radius: 50%; margin-left: auto; flex: 0 0 auto; }
+    .andamento { background: #22c55e; }
+    .nao-iniciada { background: #f59e0b; }
+    .concluida { background: #8b5cf6; }
+
+    /* === ÁREA PRINCIPAL === */
+    .main {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      border-radius: .5rem;
+      padding: clamp(1.25rem,3vw,2.6rem) clamp(1.25rem,4vw,4rem);
+      background: linear-gradient(135deg, #052b78 0%, #0646c8 46%, #032b83 100%);
+    }
+    .main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(125,211,252,.10) 1px, transparent 1px), linear-gradient(90deg, rgba(125,211,252,.10) 1px, transparent 1px);
+      background-size: 4rem 4rem;
+      opacity: .72;
+    }
+    .main { overflow-y: auto; }
+
+    /* Decoração hero */
+    .wave { position: absolute; right: -1rem; top: 1.5rem; width: min(42vw,42rem); height: 18rem; border-top: 2px solid rgba(125,211,252,.42); border-radius: 50%; transform: rotate(-10deg); }
+    .site-illustration { position: absolute; right: 2.5rem; top: 5rem; width: min(34vw,34rem); height: 18rem; opacity: .42; pointer-events: none; }
+    .crane .tower { position: absolute; right: 13rem; top: 3rem; width: .25rem; height: 10rem; background: #7dd3fc; }
+    .crane .arm { position: absolute; right: 5rem; top: 3rem; width: 14rem; height: .25rem; background: #7dd3fc; }
+    .buildings { position: absolute; right: 0; bottom: 0; display: flex; align-items: flex-end; gap: .7rem; }
+    .buildings span { display: block; width: 4rem; border: 2px solid rgba(125,211,252,.75); border-bottom: 0; background: rgba(125,211,252,.08); }
+    .buildings span:nth-child(1) { height: 5rem; }
+    .buildings span:nth-child(2) { height: 7rem; }
+    .buildings span:nth-child(3) { height: 9rem; }
+    .helmet-illustration { position: absolute; right: 2.4rem; bottom: 2.6rem; width: min(22vw,22rem); height: 10rem; opacity: .34; pointer-events: none; }
+    .helmet { position: absolute; left: 0; bottom: 2.2rem; width: 7rem; height: 3.8rem; background: linear-gradient(#1684ff,#0646c8); border-radius: 7rem 7rem .6rem .6rem; }
+    .blueprint { position: absolute; left: 0; bottom: 0; width: 11rem; height: 2.5rem; border: 2px solid rgba(125,211,252,.55); border-radius: .3rem; transform: skewX(-18deg); }
+    .bars { position: absolute; right: 0; bottom: 1rem; display: flex; align-items: flex-end; gap: .45rem; }
+    .bars span { width: 1.25rem; background: linear-gradient(#38bdf8,#075be8); border: 1px solid rgba(125,211,252,.6); }
+    .bars span:nth-child(1) { height: 2.5rem; }
+    .bars span:nth-child(2) { height: 4rem; }
+    .bars span:nth-child(3) { height: 5.5rem; }
+
+    /* === CONTEÚDO HERO === */
+    .content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 76rem;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 2rem;
+    }
+    .welcome { color: white; font-size: clamp(1.45rem,2.2vw,2.1rem); margin-bottom: .5rem; }
+    .hero-title { color: white; text-shadow: 0 .4rem 1.2rem rgba(0,0,0,.18); font-size: clamp(3rem,5vw,4.9rem); font-weight: 900; letter-spacing: -.12rem; line-height: .95; margin-bottom: 1.1rem; }
+    .hero-text { color: white; font-size: clamp(1rem,1.45vw,1.45rem); line-height: 1.45; max-width: 42rem; border-left: 4px solid #23e3ff; padding-left: 1.1rem; margin-bottom: 1.5rem; }
+    .footer { position: absolute; bottom: .5rem; left: 0; right: 0; text-align: center; font-size: .78rem; color: rgba(255,255,255,.72); z-index: 3; pointer-events: none; }
+
+    /* === CARDS PORTFÓLIO === */
+    .cards { width: 100%; display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: .75rem; margin-bottom: .9rem; }
+    .card { min-height: clamp(8.8rem,18vh,12.5rem); background: rgba(255,255,255,.94); border-radius: .75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.12); padding: 1rem; overflow: hidden; }
+    .icon { width: clamp(3rem,4.2vw,3.75rem); height: clamp(3rem,4.2vw,3.75rem); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: clamp(1.5rem,2vw,1.9rem); margin-bottom: .6rem; }
+    .icon.blue { background: #4b96f3; }
+    .icon.green { background: #3cc84a; }
+    .icon.orange { background: #f59e00; }
+    .icon.purple { background: #9948e8; }
+    .num { font-size: clamp(2rem,3vw,2.4rem); font-weight: 900; margin-bottom: .3rem; }
+    .label { font-size: clamp(.95rem,1.15vw,1.08rem); font-weight: 800; margin-bottom: .35rem; text-align: center; }
+    .sub { font-size: clamp(.82rem,1vw,.95rem); text-align: center; }
+
+    /* === PAINÉIS COMUNS === */
+    .panel, .portfolio-table, .executive-panel, .performance-panel, .cronograma-panel {
+      width: 100%;
+      background: rgba(255,255,255,.96);
+      border-radius: 1rem;
+      padding: 1.15rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 .85rem 1.8rem rgba(0,0,0,.16);
+      border: 1px solid rgba(255,255,255,.55);
+      overflow: hidden;
+    }
+    .panel h2, .portfolio-table h2, .executive-panel h2, .performance-panel h2, .cronograma-panel h2 {
+      color: #064fe0;
+      font-size: clamp(1.15rem,1.6vw,1.45rem);
+      margin-bottom: .85rem;
+    }
+
+    /* === OBRA HEAD === */
+    .obra-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; color: white; }
+    .obra-head h1 { font-size: clamp(2rem,3.5vw,3.5rem); }
+    .badge { display: inline-flex; padding: .45rem .8rem; border-radius: 999px; background: white; font-weight: 800; color: #07143f; }
+    .back-btn { height: 2.55rem; padding: 0 1.05rem; border: 1px solid rgba(125,211,252,.42); border-radius: 999px; background: linear-gradient(135deg,rgba(255,255,255,.16),rgba(125,211,252,.08)); color: white; font-weight: 900; cursor: pointer; box-shadow: 0 .55rem 1.2rem rgba(0,0,0,.18); }
+    .back-btn::before { content: '‹ '; font-size: 1.35rem; }
+
+    /* === PAINEL EXECUTIVO === */
+    .executive-title-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+    .deadline-pill { display: inline-flex; padding: .45rem .85rem; border-radius: 999px; font-size: .82rem; font-weight: 900; }
+    .deadline-atrasada { background: #fee2e2; color: #991b1b; }
+    .deadline-prazo { background: #dcfce7; color: #166534; }
+    .deadline-adiantada { background: #d1fae5; color: #065f46; }
+    .deadline-aguardando { background: #e0f2fe; color: #075985; }
+    .executive-grid { display: grid; grid-template-columns: repeat(2,minmax(260px,1fr)); gap: .9rem; }
+    .exec-card, .physical-card, .file-card, .mini { background: linear-gradient(180deg,#ffffff,#f4f8ff); border: 1px solid #d7e6f8; border-radius: .85rem; padding: 1rem; box-shadow: 0 .45rem 1rem rgba(15,23,42,.08); }
+    .exec-card h3, .file-card h3 { color: #073b8e; margin-bottom: .4rem; }
+    .exec-sub { color: #64748b; font-size: .9rem; margin-bottom: .9rem; }
+    .exec-metrics, .physical-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: .65rem; }
+    .exec-metric { background: #eef6ff; border-radius: .65rem; padding: .75rem; text-align: center; border: 1px solid #d9eaff; }
+    .exec-label, .physical-label { display: block; font-size: .78rem; color: #475569; font-weight: 800; margin-bottom: .35rem; }
+    .exec-value, .physical-value { display: block; font-size: clamp(.95rem,1.1vw,1.1rem); color: #07143f; font-weight: 900; }
+    .physical-chart { background: #fff; border: 1px solid #d7e6f8; border-radius: .85rem; padding: 1rem; overflow: auto; }
+    .chart-empty { min-height: 12rem; display: flex; align-items: center; justify-content: center; background: #eef6ff; border: 1px dashed #9fc4ef; border-radius: .7rem; color: #315b91; font-weight: 800; }
+    .dash-grid, .file-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: .75rem; }
+    .file-card { cursor: pointer; }
+    .action-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .action-btn { height: 2.5rem; padding: 0 1rem; border: 0; border-radius: .45rem; background: #075be8; color: white; font-weight: 800; cursor: pointer; }
+    .secondary-btn { background: #e8f2fc; color: #064fe0; border: 1px solid #bdd3ea; }
+
+    /* === TABELAS === */
+    .table-wrap { width: 100%; overflow-x: auto; }
+    .status-pill { display: inline-flex; padding: .32rem .65rem; border-radius: 999px; font-weight: 800; font-size: .85rem; }
+    .pill-andamento { background: #dcfce7; color: #166534; }
+    .pill-nao-iniciada { background: #fef3c7; color: #92400e; }
+    .pill-concluida { background: #ede9fe; color: #5b21b6; }
+    table { width: 100%; border-collapse: collapse; min-width: 480px; }
+    td, th { padding: .55rem; border-bottom: 1px solid #d9e5f2; text-align: left; }
+
+    /* === MODAL === */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; z-index: 10; padding: 1rem; }
+    .modal { width: min(35rem,100%); max-height: 92vh; overflow-y: auto; background: #fff; border-radius: .65rem; box-shadow: 0 2rem 5rem rgba(0,0,0,.35); }
+    .modal-title { padding: 1rem 1.25rem; font-size: 1.35rem; font-weight: 800; background: #e8f2fc; border-bottom: 1px solid #c7d9ea; }
+    .modal-body { padding: 1.25rem; display: grid; gap: .85rem; }
+    .field { display: grid; grid-template-columns: minmax(8rem,11rem) 1fr; align-items: center; gap: .75rem; }
+    .field label { font-weight: 700; }
+    .field input, .field select { width: 100%; height: 2.4rem; padding: 0 .65rem; border: 1px solid #a8bad0; border-radius: .4rem; background: white; min-width: 0; }
+    .modal-footer { padding: 1rem 1.25rem; background: #eef5fc; display: flex; justify-content: flex-end; gap: .65rem; flex-wrap: wrap; }
+    .modal-footer button { height: 2.4rem; padding: 0 1.1rem; border-radius: .4rem; border: 1px solid #9eb2c8; cursor: pointer; }
+
+    /* === CRONOGRAMA === */
+    .cronograma-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .cronograma-actions-right { display: flex; gap: .55rem; flex-wrap: wrap; align-items: center; }
+    .add-row-btn { height: 2.55rem; padding: 0 1rem; border: 0; border-radius: .55rem; background: #075be8; color: white; font-weight: 900; cursor: pointer; font-size: .9rem; }
+    .add-row-btn.default-btn { background: #eef6ff; color: #064fe0; border: 1px solid #bfdbfe; }
+    .add-row-btn.import-btn { background: #064fe0; color: #fff; border: 1px solid #064fe0; }
+    .cronograma-table-wrap { width: 100%; overflow: auto; border: 1px solid #d7e6f8; border-radius: .75rem; max-height: 62vh; background: white; }
+    .cronograma-table { width: 100%; min-width: 1180px; border-collapse: separate; border-spacing: 0; font-size: .78rem; }
+    .cronograma-table th { position: sticky; top: 0; z-index: 1; background: #e8f2fc; color: #073b8e; font-size: .72rem; text-transform: uppercase; padding: .45rem .35rem; }
+    .cronograma-table td { padding: .35rem; }
+    .cronograma-table input { width: 100%; height: 1.75rem; border: 1px solid #c8d9ec; border-radius: .32rem; padding: 0 .35rem; font-size: .76rem; }
+    .duration-wrap { display: flex; align-items: center; gap: .25rem; }
+    .duration-wrap input { flex: 1; min-width: 0; text-align: center; }
+    .duration-suffix { font-size: .78rem; font-weight: 900; color: #475569; }
+    .percent-wrap { display: flex; align-items: center; gap: .25rem; }
+    .percent-wrap input { flex: 1; min-width: 3.7rem; text-align: right; font-weight: 800; }
+    .percent-suffix { font-size: .78rem; font-weight: 900; color: #475569; }
+    .delete-row-btn { border: 0; background: #fee2e2; color: #991b1b; border-radius: .4rem; height: 2rem; padding: 0 .6rem; font-weight: 900; cursor: pointer; }
+    .delete-btn { border: 0; background: #fee2e2; color: #991b1b; border-radius: .4rem; height: 2rem; padding: 0 .6rem; font-weight: 900; cursor: pointer; }
+    .cronograma-summary-row td { background: #eaf4ff; font-weight: 900; color: #07143f; }
+    .cronograma-resumo-eap input { font-weight: 900; background: #eef6ff; }
+    .readonly-cell { white-space: nowrap; }
+    .readonly-input { background: #f1f5f9; color: #334155; font-weight: 800; }
+    .acao-cell { text-align: center; width: 4.8rem; }
+
+    /* Colunas cronograma */
+    .cronograma-table th:nth-child(1), .cronograma-table td:nth-child(1) { width: 4.2rem; min-width: 4.2rem; }
+    .cronograma-table th:nth-child(2), .cronograma-table td:nth-child(2) { width: 5.8rem; min-width: 5.8rem; max-width: 5.8rem; }
+    .cronograma-table th:nth-child(3), .cronograma-table td:nth-child(3) { width: 22rem; min-width: 18rem; }
+    .cronograma-table th:nth-child(4), .cronograma-table td:nth-child(4) { width: 5.4rem; min-width: 5.4rem; max-width: 5.4rem; }
+    .cronograma-table th:nth-child(5), .cronograma-table td:nth-child(5),
+    .cronograma-table th:nth-child(6), .cronograma-table td:nth-child(6),
+    .cronograma-table th:nth-child(9), .cronograma-table td:nth-child(9),
+    .cronograma-table th:nth-child(10), .cronograma-table td:nth-child(10) { width: 7.8rem; min-width: 7.8rem; max-width: 7.8rem; }
+    .cronograma-table th:nth-child(7), .cronograma-table td:nth-child(7) { width: 6.2rem; min-width: 6.2rem; max-width: 6.2rem; }
+    .cronograma-table th:nth-child(8), .cronograma-table td:nth-child(8) { width: 5.2rem; min-width: 5.2rem; max-width: 5.2rem; }
+    .cronograma-table th:nth-child(11), .cronograma-table td:nth-child(11) { width: 4.8rem; min-width: 4.8rem; max-width: 4.8rem; }
+
+    /* === GANTT === */
+    .gantt-panel { margin-top: 1rem; background: #fff; border: 1px solid #d7e6f8; border-radius: .85rem; padding: 1rem; overflow: hidden; box-shadow: 0 .35rem 1rem rgba(15,23,42,.08); }
+    .gantt-panel h3 { color: #073b8e; margin-bottom: .75rem; font-size: .95rem; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; }
+    .gantt-wrap { width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: .7rem; background: linear-gradient(180deg,#f8fbff,#ffffff); }
+    .gantt-months { display: grid; grid-template-columns: 180px minmax(520px,1fr); gap: .55rem; padding: .42rem .55rem; background: #eaf4ff; border-bottom: 1px solid #d7e6f8; font-size: .72rem; font-weight: 900; color: #073b8e; position: sticky; top: 0; z-index: 2; }
+    .gantt-scale { position: relative; height: 22px; min-width: var(--gantt-width,520px); width: var(--gantt-width,520px); }
+    .gantt-month { position: absolute; top: 0; width: 65px; min-width: 65px; max-width: 65px; height: 22px; line-height: 22px; padding: 0 2px; font-size: 10.5px; text-align: center; white-space: nowrap; overflow: hidden; border-left: 1px solid #b9d7f4; border-right: 1px solid rgba(185,215,244,.55); background: rgba(234,244,255,.95); }
+    .gantt-row { display: grid; grid-template-columns: 180px minmax(520px,1fr); gap: .55rem; padding: .48rem .55rem; border-bottom: 1px solid #e2e8f0; }
+    .gantt-row:last-child { border-bottom: 0; }
+    .gantt-info { font-size: .82rem; color: #0f172a; font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
+    .gantt-desc { display: block; color: #64748b; font-weight: 600; margin-top: .15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gantt-area { position: relative; min-height: 2.75rem; min-width: var(--gantt-width,520px); width: var(--gantt-width,520px); }
+    .gantt-bar { position: absolute; height: .78rem; border-radius: 999px; min-width: 1.2rem; box-shadow: 0 .2rem .45rem rgba(15,23,42,.15); overflow: visible; }
+    .gantt-p { top: .18rem; background: #2563eb; }
+    .gantt-r { top: 1.32rem; background: #16a34a; }
+    .gantt-progress { position: absolute; left: 0; top: 0; bottom: 0; background: #ef4444; border-radius: 999px 0 0 999px; opacity: .9; }
+    .gantt-letter { position: absolute; left: .35rem; top: 50%; transform: translateY(-50%); color: white; font-size: .58rem; font-weight: 900; z-index: 2; }
+    .gantt-date { position: absolute; left: calc(100% + .35rem); top: 50%; transform: translateY(-50%); font-size: .62rem; color: #334155; font-weight: 800; white-space: nowrap; }
+    .gantt-percent-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: .68rem; font-weight: 900; color: #fff; z-index: 3; text-shadow: 0 1px 2px rgba(15,23,42,.45); white-space: nowrap; pointer-events: none; }
+    .gantt-empty { padding: 1.5rem; text-align: center; color: #64748b; font-weight: 800; }
+    .gantt-row.gantt-summary { background: #eef6ff; font-weight: 900; }
+
+    /* === EAP (TIMELINE EXECUTIVA) === */
+    .timeline-exec-section {
+      margin-top: 1rem;
+      background: #ffffff;
+      border: 1px solid #d7e6f8;
+      border-radius: 1rem;
+      padding: .85rem;
+      box-shadow: 0 .35rem 1rem rgba(15,23,42,.07);
+    }
+    .timeline-exec-section h2 {
+      margin: 0 0 .85rem 0;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #073b8e;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    .timeline-exec-subtitle { margin: -.45rem 0 .75rem 0; font-size: .78rem; color: #64748b; font-weight: 700; }
+    .timeline-exec-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: .75rem; background: linear-gradient(180deg,#f8fbff,#ffffff); width: 100%; }
+    .timeline-exec-months, .timeline-exec-row {
+      display: grid;
+      grid-template-columns: minmax(260px,320px) minmax(520px,1fr);
+      gap: .35rem;
+    }
+    .timeline-exec-months { padding: .22rem .35rem; background: #eaf4ff; border-bottom: 1px solid #d7e6f8; font-size: 10px; font-weight: 900; color: #073b8e; }
+    .timeline-exec-scale { position: relative; width: var(--timeline-width,520px); min-width: var(--timeline-width,520px); height: 22px; }
+    .timeline-exec-area { position: relative; width: var(--timeline-width,520px); min-width: var(--timeline-width,520px); height: 38px; }
+    .timeline-exec-month { position: absolute; top: 0; width: 72px; min-width: 72px; max-width: 72px; height: 22px; line-height: 22px; padding: 0 4px; font-size: 10px; text-align: center; white-space: nowrap; overflow: visible; border-left: 1px solid #b9d7f4; border-right: 1px solid rgba(185,215,244,.55); background: rgba(234,244,255,.95); }
+    .timeline-exec-row { padding: .38rem .35rem; border-bottom: 1px solid #e2e8f0; align-items: center; }
+    .timeline-exec-row.nivel0 { background: #eef6ff; font-weight: 900; }
+    .timeline-exec-info { display: block; font-size: .74rem; font-weight: 900; color: #0f172a; white-space: normal; word-break: break-word; overflow-wrap: anywhere; overflow: visible; }
+    .timeline-exec-name { display: block; white-space: normal; word-break: break-word; overflow-wrap: anywhere; overflow: visible; }
+    .timeline-exec-bar { position: absolute; height: 14px; border-radius: 999px; min-width: 8px; overflow: visible; }
+    .timeline-exec-bar.p { top: 1px; background: linear-gradient(90deg,#1d4ed8,#93c5fd); }
+    .timeline-exec-bar.r { top: 21px; background: linear-gradient(90deg,#16a34a,#86efac); }
+    .timeline-exec-label { position: absolute; left: 4px; top: 0; height: 14px; line-height: 14px; font-size: .58rem; font-weight: 900; color: #fff; z-index: 2; }
+    .timeline-exec-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; background: rgba(239,68,68,.72); }
+    .timeline-exec-date { position: absolute; right: -3.9rem; top: -1px; font-size: .58rem; font-weight: 800; color: #334155; }
+    .timeline-exec-sem-real { position: absolute; top: 21px; left: 0; height: 14px; line-height: 14px; border: 1px dashed #94a3b8; border-radius: 999px; padding: 0 .45rem 0 1.2rem; font-size: .62rem; font-weight: 800; color: #64748b; background: #f8fafc; }
+    .timeline-exec-sem-real::before { content: 'R'; position: absolute; left: .35rem; top: 0; font-size: .58rem; font-weight: 900; color: #64748b; }
+    .timeline-exec-empty { padding: 1rem; color: #64748b; font-size: .85rem; text-align: center; }
+
+
+
+    /* === RESUMO ATIVIDADES === */
+    .activity-summary-panel { margin-top: .85rem; margin-bottom: 1rem; background: #fff; border: 1px solid #d7e6f8; border-radius: .85rem; padding: 1rem; box-shadow: 0 .25rem .8rem rgba(15,23,42,.05); }
+    .activity-summary-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: .65rem; }
+    .activity-summary-card { background: #f8fbff; border: 1px solid #d7e6f8; border-radius: .65rem; padding: .75rem; text-align: center; }
+    .activity-summary-card.pending { border-color: #fde68a; background: #fffbeb; }
+    .activity-summary-card.progress { border-color: #bfdbfe; background: #eff6ff; }
+    .activity-summary-card.done { border-color: #bbf7d0; background: #f0fdf4; }
+    .activity-summary-label { display: block; font-size: .72rem; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: .03em; margin-bottom: .35rem; }
+    .activity-summary-card strong { display: block; font-size: 1.5rem; font-weight: 900; color: #0f172a; }
+    .activity-summary-card small { display: block; font-size: .68rem; color: #64748b; margin-top: .2rem; }
+
+    /* === PERFORMANCE FÍSICA === */
+    .physical-performance, .financial-performance, .performance-section {
+      margin-top: 1rem;
+      background: #ffffff;
+      border: 1px solid #d7e6f8;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 .35rem 1rem rgba(15,23,42,.07);
+    }
+    .physical-performance h2, .financial-performance h2, .performance-section h2 {
+      margin: 0 0 .85rem 0;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #073b8e;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    /* === GRÁFICO CURVA === */
+    .pf-chart-wrap { width: 100%; overflow-x: auto; padding: .35rem 0; }
+    .pf-legend { display: flex; gap: .9rem; flex-wrap: wrap; align-items: center; margin: .15rem 0 .55rem; color: #0f172a; font-size: .78rem; font-weight: 800; }
+    .pf-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+    .pf-legend i { display: inline-block; }
+    .pf-legend .legend-dot { width: 14px; height: 14px; border-radius: 999px; background: #fff; border: 3px solid currentColor; }
+    .pf-legend .previsto { color: #2563eb; }
+    .pf-legend .real { color: #ef4444; }
+    .pf-legend .tendencia { color: #16a34a; }
+    .pf-legend .bar { width: 14px; height: 14px; border-radius: 4px; }
+    .pf-legend .bar.prev { background: rgba(37,99,235,.35); }
+    .pf-legend .bar.real { background: rgba(239,68,68,.30); }
+    .pf-chart-svg { min-width: 920px; width: 100%; height: auto; background: #fff; border: 1px solid rgba(148,163,184,.22); border-radius: 1rem; }
+    .pf-axis { stroke: #64748b; stroke-width: 1; }
+    .pf-grid { stroke: #e2e8f0; stroke-width: 1; }
+    .pf-axis-label { font-size: 12px; fill: #334155; font-weight: 700; }
+    .pf-axis-title { font-size: 13px; fill: #0f172a; font-weight: 900; }
+    .pf-line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .pf-previsto { stroke: #2563eb; }
+    .pf-real { stroke: #ef4444; }
+    .pf-tendencia { stroke: #16a34a; stroke-dasharray: 7 7; }
+    .pf-previsto-dot { fill: #2563eb; stroke: #fff; stroke-width: 1.5; }
+    .pf-real-dot { fill: #ef4444; stroke: #fff; stroke-width: 1.5; }
+    .pf-tendencia-dot { fill: #16a34a; stroke: #fff; stroke-width: 1.5; }
+    .pf-bar-prev { fill: rgba(37,99,235,.35); }
+    .pf-bar-real { fill: rgba(239,68,68,.35); }
+
+    /* === SINALEIRO DESVIO === */
+    .desvio-title-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 6px; vertical-align: middle; }
+    .desvio-title-dot.red { background: #ef4444; }
+    .desvio-title-dot.green { background: #22c55e; }
+
+    /* === BOTÃO EXPANDIR === */
+    .expand-work-btn {
+      position: fixed;
+      left: calc(var(--sidebar-w) + 1rem);
+      top: calc(var(--topbar-h) + 1rem);
+      z-index: 100;
+      width: 2rem;
+      height: 3.6rem;
+      border-radius: .75rem;
+      background: #e8f2fc;
+      border: 1px solid #c7d9ea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #0054df;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    body.fullscreen-work .expand-work-btn { left: 1rem; }
+    body.fullscreen-work .sidebar { display: none; }
+
+    /* === INDICADORES DA OBRA — LAYOUT DINÂMICO === */
+    .indicadores-panel { padding: 1.1rem 1.25rem 1.25rem; }
+    .indicadores-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .indicadores-info h2 { color: #064fe0; font-size: clamp(1.1rem,1.5vw,1.35rem); margin-bottom: .2rem; }
+    .indicadores-local { color: #64748b; font-size: .82rem; font-weight: 600; }
+    .indicadores-meta { display: flex; gap: 1.1rem; flex-wrap: wrap; align-items: center; }
+    .indicadores-engenheiro { display: flex; flex-direction: column; gap: .18rem; min-width: 140px; }
+    .ind-meta-label { font-size: .66rem; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+    .ind-meta-value { font-size: .9rem; font-weight: 800; color: #0f172a; }
+
+    /* Prazo badges */
+    .prazo-badge { display: inline-flex; align-items: center; gap: .35rem; padding: .32rem .75rem; border-radius: 999px; font-size: .78rem; font-weight: 900; letter-spacing: .03em; }
+    .prazo-ok     { background: #dcfce7; color: #166534; }
+    .prazo-atraso { background: #fee2e2; color: #991b1b; }
+    .prazo-adiant { background: #d1fae5; color: #065f46; }
+    .prazo-aguard { background: #f1f5f9; color: #64748b; }
+    .prazo-dias   { font-size: .72rem; opacity: .85; }
+
+    /* Grid LB / PL / Desvio */
+    .indicadores-grid { display: flex; gap: 0; align-items: stretch; background: #f8fbff; border: 1px solid #dbeafe; border-radius: .85rem; overflow: hidden; }
+    .indicadores-col { flex: 1; padding: 1rem 1.1rem; min-width: 0; }
+    .indicadores-col.lb  { background: #eff6ff; }
+    .indicadores-col.pl  { background: #f0fdf4; }
+    .indicadores-col.desvio { background: #fefce8; }
+    .indicadores-col-title { font-size: .72rem; font-weight: 900; color: #334155; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .75rem; }
+    .indicadores-divider { width: 1px; background: #cbd5e1; flex: 0 0 1px; }
+    .ind-row { display: flex; justify-content: space-between; align-items: center; padding: .38rem 0; border-bottom: 1px solid rgba(148,163,184,.18); gap: .5rem; }
+    .ind-row:last-child { border-bottom: 0; }
+    .ind-label { font-size: .75rem; font-weight: 700; color: #64748b; white-space: nowrap; }
+    .ind-val   { font-size: .88rem; font-weight: 900; color: #0f172a; text-align: right; }
+    .val-red   { color: #dc2626; }
+    .val-green { color: #16a34a; }
+    .val-ok    { color: #2563eb; }
+
+    /* === TOOLTIP INTERATIVO DOS GRÁFICOS === */
+    .chart-tooltip {
+      position: fixed; z-index: 9999; pointer-events: none;
+      background: rgba(15,23,42,.92); color: #f8fafc;
+      border-radius: .5rem; padding: .6rem .85rem;
+      font-size: .8rem; font-weight: 700; line-height: 1.55;
+      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.3);
+      border: 1px solid rgba(148,163,184,.22);
+      min-width: 140px; max-width: 220px;
+      opacity: 0; transition: opacity .12s;
+      white-space: nowrap;
+    }
+    .chart-tooltip.visible { opacity: 1; }
+    .chart-tooltip-title { font-size: .72rem; color: #94a3b8; font-weight: 800; margin-bottom: .25rem; letter-spacing: .04em; text-transform: uppercase; }
+    .chart-tooltip-row { display: flex; justify-content: space-between; gap: .85rem; }
+    .chart-tooltip-row span:first-child { color: #94a3b8; }
+    .chart-tooltip-row span:last-child  { font-weight: 900; color: #f8fafc; }
+
+    .add-row-btn.clear-btn { background: #fff1f2; color: #991b1b; border: 1px solid #fecaca; }
+    .add-row-btn.clear-btn:hover { background: #fee2e2; }
+
+    /* === PAINEL IA === */
+    .ia-panel {
+      width: 100%; margin-top: 1rem;
+      background: linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);
+      border-radius: 1rem;
+      padding: 1.35rem 1.5rem;
+      box-shadow: 0 1rem 2.5rem rgba(0,0,0,.25);
+      border: 1px solid rgba(125,211,252,.18);
+    }
+    .ia-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .ia-title { font-size: clamp(1rem,1.4vw,1.25rem); font-weight: 900; color: #f8fafc; letter-spacing: .03em; }
+    .ia-subtitle { font-size: .8rem; color: #94a3b8; margin-top: .25rem; font-weight: 600; }
+    .ia-btn {
+      height: 2.6rem; padding: 0 1.35rem;
+      background: linear-gradient(135deg,#2563eb,#075be8);
+      color: white; border: 0; border-radius: .55rem;
+      font-weight: 900; font-size: .9rem; cursor: pointer;
+      box-shadow: 0 .5rem 1.25rem rgba(37,99,235,.4);
+      white-space: nowrap; flex: 0 0 auto;
+      transition: opacity .15s, transform .1s;
+    }
+    .ia-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .ia-btn:disabled { opacity: .55; cursor: wait; transform: none; }
+    .ia-body { min-height: 4rem; }
+    .ia-placeholder { color: #64748b; font-size: .88rem; font-style: italic; padding: .5rem 0; }
+    .ia-loading { display: flex; align-items: center; gap: .75rem; color: #94a3b8; font-size: .9rem; padding: .5rem 0; }
+    .ia-spinner {
+      width: 1.25rem; height: 1.25rem; border: 3px solid rgba(125,211,252,.2);
+      border-top-color: #38bdf8; border-radius: 50%;
+      animation: ia-spin .7s linear infinite; flex: 0 0 auto;
+    }
+    @keyframes ia-spin { to { transform: rotate(360deg); } }
+    .ia-result {
+      color: #e2e8f0; font-size: .88rem; line-height: 1.7;
+      background: rgba(255,255,255,.04); border-radius: .65rem;
+      padding: 1rem 1.15rem; border: 1px solid rgba(148,163,184,.12);
+    }
+    .ia-result h4.ia-h4 { color: #7dd3fc; font-size: .92rem; font-weight: 900; margin: .85rem 0 .35rem; letter-spacing: .03em; }
+    .ia-result ul { padding-left: 1.25rem; margin: .35rem 0; }
+    .ia-result li { margin-bottom: .3rem; }
+    .ia-result strong { color: #f8fafc; }
+    .ia-result em { color: #a5b4fc; }
+    .ia-footer { font-size: .7rem; color: #475569; margin-top: .65rem; text-align: right; font-style: italic; }
+    .ia-error { color: #fca5a5; font-size: .88rem; padding: .5rem 0; }
+    @media (max-width: 1366px) {
+      :root { --topbar-h: 3.6rem; --sidebar-w: clamp(15rem,24vw,21rem); }
+      .main { padding: 1.35rem 2rem; }
+      .content { justify-content: flex-start; padding-top: .5rem; }
+      .hero-title { font-size: clamp(2.8rem,4.6vw,4rem); }
+      .card { min-height: 8.2rem; }
+    }
+    @media (max-width: 1024px) {
+      :root { --topbar-h: auto; --sidebar-w: 14.5rem; }
+      .topbar { min-height: 4rem; height: auto; flex-wrap: wrap; padding-top: .5rem; padding-bottom: .5rem; }
+      .logo { width: 100%; }
+      .sidebar { min-width: 14.5rem; max-width: 15rem; }
+      .main { overflow-y: auto; }
+      .content { min-height: auto; justify-content: flex-start; }
+      .footer { position: relative; margin-top: .8rem; bottom: auto; color: white; }
+      .timeline-exec-months, .timeline-exec-row { grid-template-columns: minmax(220px,280px) minmax(520px,1fr); }
+    }
+    @media (max-width: 900px) {
+      .executive-grid { grid-template-columns: 1fr; }
+      .exec-metrics { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .timeline-exec-months, .timeline-exec-row { grid-template-columns: 210px max-content; }
+    }
+    @media (max-width: 600px) {
+      .cronograma-actions-right { width: 100%; justify-content: flex-start; }
+    }
+
+    /* === SELETOR DE EMPRESAS (CEO) === */
+    .empresa-select-wrap { display:none; align-items:center; gap:.5rem; margin-left:auto; }
+    body.perfil-ceo .empresa-select-wrap { display:flex; }
+    .empresa-label { font-size:.75rem; color:#64748b; font-weight:500; white-space:nowrap; }
+    .empresa-select { font-size:.82rem; font-weight:600; color:#07143f; border:1.5px solid #e2e8f0; border-radius:.45rem; padding:.3rem .7rem; background:#fff; cursor:pointer; outline:none; max-width:200px; }
+    .empresa-select:focus { border-color:#075be8; }
+
+    /* === CONTROLE DE PERFIL === */
+    body.visualizador .edit-only { display: none !important; }
+
+    /* === PAINEL CEO === */
+    .ceo-panel { padding: 1.5rem 2rem; max-width: 900px; margin: 0 auto; }
+    .ceo-panel h2 { font-size: 1.3rem; font-weight: 700; color: #07143f; margin-bottom: 1.5rem; display:flex; align-items:center; gap:.5rem; }
+    .ceo-section { background: #fff; border-radius: .85rem; border: 1px solid #d7e6f8; padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(15,23,42,.06); }
+    .ceo-section h3 { font-size: 1rem; font-weight: 600; color: #07143f; margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
+    .ceo-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .ceo-table th { text-align: left; padding: .5rem .75rem; background: #f1f5f9; color: #475569; font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+    .ceo-table td { padding: .6rem .75rem; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+    .ceo-table tr:last-child td { border-bottom: none; }
+    .ceo-table tr:hover td { background: #f8fafc; }
+    .ceo-btn { padding: .35rem .8rem; border-radius: .4rem; border: none; cursor: pointer; font-size: .8rem; font-weight: 600; }
+    .ceo-btn.primary { background: #075be8; color: #fff; }
+    .ceo-btn.primary:hover { background: #0548c0; }
+    .ceo-btn.danger { background: #fee2e2; color: #dc2626; }
+    .ceo-btn.danger:hover { background: #fecaca; }
+    .ceo-btn.sm { padding: .25rem .6rem; font-size: .75rem; }
+    .ceo-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+    .ceo-form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+    .ceo-form-group { display: flex; flex-direction: column; gap: .3rem; }
+    .ceo-form-group label { font-size: .78rem; font-weight: 600; color: #475569; }
+    .ceo-form-group input, .ceo-form-group select { padding: .5rem .75rem; border: 1.5px solid #d1d5db; border-radius: .45rem; font-size: .85rem; outline: none; }
+    .ceo-form-group input:focus, .ceo-form-group select:focus { border-color: #075be8; }
+    .ceo-actions { display: flex; gap: .5rem; justify-content: flex-end; margin-top: .75rem; }
+    .ceo-badge { font-size: .72rem; padding: .2rem .5rem; border-radius: .3rem; font-weight: 600; }
+    .ceo-badge.ceo { background: #fef3c7; color: #92400e; }
+    .ceo-badge.adm { background: #dbeafe; color: #1e40af; }
+    .ceo-badge.viz { background: #f0fdf4; color: #166534; }
+
+    /* === TELA DE PRIMEIRO ACESSO === */
+    .primeiro-acesso-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#07143f 0%,#075be8 100%); display:none; align-items:center; justify-content:center; z-index:9999; }
+    .primeiro-acesso-overlay.ativo { display:flex; }
+    .primeiro-acesso-box { background:#fff; border-radius:1.2rem; padding:2.5rem 2.8rem; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(7,20,63,.35); }
+    .primeiro-acesso-box h2 { font-size:1.1rem; font-weight:700; color:#07143f; margin-bottom:.3rem; }
+    .primeiro-acesso-box p { font-size:.85rem; color:#64748b; margin-bottom:1.5rem; line-height:1.5; }
+
+    /* === TELA DE LOGIN === */
+    .login-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#07143f 0%,#075be8 100%); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .login-box { background:#fff; border-radius:1.2rem; padding:2.5rem 2.8rem; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(7,20,63,.35); }
+    .login-logo { font-size:2rem; font-weight:900; letter-spacing:.12rem; text-align:center; margin-bottom:.3rem; }
+    .login-logo span { color:#075be8; }
+    .login-sub { text-align:center; color:#64748b; font-size:.85rem; margin-bottom:2rem; }
+    .login-field { margin-bottom:1.1rem; }
+    .login-field label { display:block; font-size:.82rem; font-weight:600; color:#374151; margin-bottom:.35rem; }
+    .login-field input { width:100%; padding:.7rem .95rem; border:1.5px solid #d1d5db; border-radius:.55rem; font-size:.92rem; outline:none; transition:border .2s; }
+    .login-field input:focus { border-color:#075be8; }
+    .login-btn { width:100%; padding:.8rem; background:#075be8; color:#fff; border:none; border-radius:.55rem; font-size:1rem; font-weight:700; cursor:pointer; margin-top:.5rem; transition:background .2s; }
+    .login-btn:hover { background:#0548c0; }
+    .login-btn:disabled { background:#94a3b8; cursor:not-allowed; }
+    .login-error { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:.5rem; padding:.6rem .9rem; font-size:.83rem; margin-bottom:1rem; display:none; }
+    .login-loading { text-align:center; color:#64748b; font-size:.85rem; margin-top:.8rem; display:none; }
+    .login-forgot { text-align:center; margin-top:.75rem; font-size:.82rem; color:#64748b; }
+    .login-forgot a { color:#075be8; cursor:pointer; text-decoration:none; font-weight:500; }
+    .login-forgot a:hover { text-decoration:underline; }
+    .login-success { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:.5rem; padding:.6rem .9rem; font-size:.83rem; margin-bottom:1rem; display:none; }
+    /* === BADGE DE USUÁRIO NA TOPBAR === */
+    .user-badge { display:flex; align-items:center; gap:.5rem; margin-left:auto; }
+    .user-name { font-size:.82rem; font-weight:600; color:#07143f; }
+    .user-perfil { font-size:.72rem; padding:.2rem .55rem; border-radius:.3rem; font-weight:700; }
+    .perfil-ceo { background:#fef3c7; color:#92400e; }
+    .perfil-adm { background:#dbeafe; color:#1e40af; }
+    .perfil-view { background:#f0fdf4; color:#166534; }
+    /* Garante que body.perfil-ceo não herda cor do badge */
+    body.perfil-ceo { background: #eef5fc; color: var(--dark); }
+    .logout-btn { padding:.35rem .75rem; border:1.5px solid #e2e8f0; border-radius:.4rem; background:#fff; color:#64748b; font-size:.78rem; cursor:pointer; font-weight:600; }
+    .logout-btn:hover { background:#f1f5f9; color:#dc2626; border-color:#fecaca; }
+  </style>
+</head>
+<body>
+
+<button id="expandWorkBtn" class="expand-work-btn" onclick="alternarTelaCadastro()" title="Ampliar área de cadastro" aria-label="Ampliar área de cadastro">‹</button>
+
+<div class="app-root">
+  <header class="topbar">
+    <div class="logo"><span class="logo-plan">PLAN</span><span class="logo-analytics">ALYTICS</span></div>
+    <button class="top-btn settings" onclick="alert('Configurações serão desenvolvidas em breve.')">⚙️ Configurações</button>
+    <button class="top-btn primary" onclick="abrirModal()">＋ Cadastrar Nova Obra</button>
+    <button class="top-btn settings" onclick="exportarBackupPlanalytics()">⬇️ Exportar Backup</button>
+    <button class="top-btn settings" onclick="selecionarImportacaoBackupPlanalytics()">⬆️ Importar Backup</button>
+    <input id="backupImportInput" type="file" accept=".json,application/json" style="display:none" onchange="importarBackupPlanalytics(event)">
+    <button class="top-btn settings ceo-only" onclick="abrirPainelCEO()" style="display:none" title="Painel CEO">⚙ Painel CEO</button>
+    <div class="empresa-select-wrap">
+      <span class="empresa-label">Empresa:</span>
+      <select class="empresa-select" id="empresaSelect" onchange="trocarEmpresa(this.value)">
+        <option value="">Carregando...</option>
+      </select>
+    </div>
+    <div class="user-badge">
+      <span class="user-name" id="topUserName">—</span>
+      <span class="user-perfil" id="topUserPerfil"></span>
+      <button class="logout-btn" onclick="fazerLogout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="tree-title" onclick="abrirPortfolio()">
+        <span id="portfolioArrow" class="arrow" onclick="togglePortfolio(event)">▼</span>
+        <span class="folder">📁</span>
+        <span>Portfólio</span>
+      </div>
+      <div id="portfolioContent"></div>
+    </aside>
+
+    <main class="main">
+      <div class="wave"></div>
+      <div class="site-illustration">
+        <div class="crane"><span class="tower"></span><span class="arm"></span></div>
+        <div class="buildings"><span></span><span></span><span></span></div>
+      </div>
+      <div class="helmet-illustration">
+        <div class="helmet"></div>
+        <div class="blueprint"></div>
+        <div class="bars"><span></span><span></span><span></span></div>
+      </div>
+      <section id="content" class="content"></section>
+      <div class="footer">© 2026 Planalytics. Todos os direitos reservados. Desenvolvido por: Jônatas Sousa de Melo.</div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal Cadastro/Edição de Obra -->
+<div id="modalBg" class="modal-bg">
+  <form class="modal" onsubmit="salvarObra(event)">
+    <div id="modalTitle" class="modal-title">Cadastrar Nova Obra</div>
+    <div class="modal-body">
+      <div class="field"><label>ID da Obra</label><input id="obraId" required placeholder="Ex: OB-0001"></div>
+      <div class="field"><label>Descrição</label><input id="obraDescricao" required placeholder="Ex: Shopping Center"></div>
+      <div class="field"><label>Engenheiro Responsável</label><input id="obraEngenheiro" required></div>
+      <div class="field"><label>Localização da Obra</label><input id="obraLocalizacao" required placeholder="Ex: Maceió/AL, Unidade X, Área Y"></div>
+      <div class="field"><label>R$ Contrato</label><input id="obraContrato" type="number" min="0" step="0.01" required placeholder="Ex: 1500000"></div>
+      <div class="field"><label>Status</label>
+        <select id="obraStatus" required>
+          <option>Em andamento</option>
+          <option>Não iniciada</option>
+          <option>Concluída</option>
+        </select>
+      </div>
+      <div class="field"><label>Início LB</label><input id="obraInicio" type="date" onchange="calcularDuracao()" required></div>
+      <div class="field"><label>Término LB</label><input id="obraTermino" type="date" onchange="calcularDuracao()" required></div>
+      <div class="field"><label>Duração</label><input id="obraDuracao" disabled value="Calculada automaticamente"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" id="btnExcluir" class="top-btn danger" onclick="excluirObraAtual()" style="display:none;margin-right:auto;">Excluir</button>
+      <button type="button" onclick="fecharModal()">Cancelar</button>
+      <button class="top-btn primary" type="submit">Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Tela de Primeiro Acesso -->
+<div id="primeiroAcessoOverlay" class="primeiro-acesso-overlay">
+  <div class="primeiro-acesso-box">
+    <div class="login-logo">PLAN<span>ALYTICS</span></div>
+    <h2 style="margin-top:1rem">Bem-vindo! Defina sua senha</h2>
+    <p>Este é seu primeiro acesso. Por segurança, defina uma senha pessoal antes de continuar.</p>
+    <div class="login-error" id="paError"></div>
+    <div class="login-field">
+      <label>Nova senha</label>
+      <input type="password" id="paNovaSenha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="login-field">
+      <label>Confirmar senha</label>
+      <input type="password" id="paConfirmarSenha" placeholder="Repita a senha"
+        onkeydown="if(event.key==='Enter') salvarNovaSenha()">
+    </div>
+    <button class="login-btn" onclick="salvarNovaSenha()">Salvar e entrar</button>
+    <div class="login-loading" id="paLoading" style="display:none">Salvando nova senha...</div>
+  </div>
+</div>
+
+<!-- Tela de Login -->
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">PLAN<span>ALYTICS</span></div>
+    <div class="login-sub">Sistema de Gestão de Obras</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-field">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="loginSenha" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter') fazerLogin()">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-loading" id="loginLoading">Verificando credenciais...</div>
+  </div>
+</div>
+
+
+<script>
+/* ============================================================
+   PLANALYTICS v3.0 — SCRIPT UNIFICADO
+   Organização:
+   1. Constantes e dados iniciais
+   2. Utilidades gerais
+   3. Persistência (localStorage)
+   4. Navegação e state
+   5. Modal de cadastro
+   6. Renderização: Sidebar/Árvore
+   7. Renderização: Portfólio
+   8. Renderização: Visão da Obra (Painel Executivo)
+   9. Renderização: Banco de Dados
+   10. Cronograma - Lógica
+   11. Cronograma - Renderização + Gantt
+   12. Timeline Executiva (EAP GANTT)
+   13. Curva Física - Lógica + Renderização
+   14. Curva Financeira - Lógica + Renderização
+   15. Importação/Exportação XLSX
+   16. Backup JSON
+   17. Inicialização
+   ============================================================ */
+
+/* ─── 0. SUPABASE — CONFIGURAÇÃO ─── */
+const SUPABASE_URL  = 'https://fjwizoirgrvlyunkbkef.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_c31I1oXECyJazXpVfYR-Rw_G2d3qj5G';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+/* ─── 1. CONSTANTES E DADOS INICIAIS ─── */
+const STORAGE_KEY = 'planalytics_obras_v3';
+const OLD_KEYS = ['planalytics_obras_v2'];
+
+// Estado de sessão
+let usuarioAtual = null;  // { id, email, nome, perfil, empresa_id }
+let empresaAtualId = null; // empresa sendo visualizada pelo CEO
+
+const PADRAO_OBRAS = [
+  { id:'OB-0001', descricao:'Shopping Center', engenheiro:'Carlos Eduardo Silva', status:'Em andamento', inicio:'2026-05-01', termino:'2026-12-31', localizacao:'Maceió/AL', contrato:1500000 },
+  { id:'OB-0002', descricao:'Residencial Horizonte', engenheiro:'Mariana Costa', status:'Em andamento', inicio:'2026-04-10', termino:'2026-10-30', localizacao:'Maceió/AL', contrato:900000 },
+  { id:'OB-0003', descricao:'Hospital São Lucas', engenheiro:'Rafael Lima', status:'Não iniciada', inicio:'2026-08-01', termino:'2027-02-28', localizacao:'Maceió/AL', contrato:2500000 }
+];
+
+let obras = [];
+let portfolioAberto = true;
+let editandoIndex = null;
+let telaAtual = 'portfolio';
+let obraAtualId = null;
+let arquivoAtual = null;
+
+/* ─── 2. UTILIDADES GERAIS ─── */
+function $(id) { return document.getElementById(id); }
+
+function esc(v) {
+  return String(v ?? '').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+function fmt(d) {
+  if(!d) return '';
+  const [y,m,day] = String(d).split('-');
+  return day && m && y ? `${day}/${m}/${y}` : d;
+}
+
+function moeda(v) { return Number(v || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' }); }
+
+function mi(v) {
+  const n = Number(v || 0);
+  if(Math.abs(n) >= 1e6) return (n / 1e6).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' Mi';
+  if(Math.abs(n) >= 1e3) return (n / 1e3).toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 }) + ' K';
+  return moeda(n);
+}
+
+function duracaoPorDatas(inicio, termino) {
+  const a = new Date((inicio||'') + 'T00:00:00');
+  const b = new Date((termino||'') + 'T00:00:00');
+  if(!inicio || !termino || isNaN(a) || isNaN(b) || b < a) return 0;
+  return Math.ceil((b-a)/(1000*60*60*24)) + 1;
+}
+
+function duracao(o) { return duracaoPorDatas(o.inicio, o.termino); }
+
+function normalizarDataExcel(valor) {
+  if(!valor) return '';
+  if(typeof valor === 'number' && typeof XLSX !== 'undefined') {
+    const d = XLSX.SSF.parse_date_code(valor);
+    if(d) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  }
+  if(valor instanceof Date && !isNaN(valor)) {
+    return `${valor.getFullYear()}-${String(valor.getMonth()+1).padStart(2,'0')}-${String(valor.getDate()).padStart(2,'0')}`;
+  }
+  const s = String(valor).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(m) { const y = m[3].length===2 ? '20'+m[3] : m[3]; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+  return s;
+}
+
+/* ─── 3. PERSISTÊNCIA ─── */
+function arquivosPadrao() {
+  return [
+    { nome:'Cronograma', tipo:'arquivo', arquivo:'cronograma' },
+    { nome:'Curva de Avanço Físico', tipo:'arquivo', arquivo:'curvaFisica' },
+    { nome:'Curva de Avanço Financeira', tipo:'arquivo', arquivo:'curvaFinanceira' }
+  ];
+}
+
+function criarBase(o) {
+  return {
+    obraId: o.id,
+    arquivos: {
+      cronograma: { registros:0, dados:[] },
+      curvaFisica: { registros:0, dados:[] },
+      curvaFinanceira: { registros:0, dados:[] }
+    },
+    resumo: { cronograma:0, curvaFisica:0, curvaFinanceira:0, avanco:0, custos:0, indicadores:0 }
+  };
+}
+
+function criarEstrutura() {
+  return [{ nome:'Banco de Dados', tipo:'pasta', aberto:true, filhos:arquivosPadrao() }];
+}
+
+function normalizar(o) {
+  if(!o.uid) o.uid = 'obra_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+  if(!o.localizacao) o.localizacao = 'Localização não informada';
+  if(o.contrato === undefined || o.contrato === null) o.contrato = 0;
+  o.estrutura = criarEstrutura();
+  if(!o.base) o.base = criarBase(o);
+  if(!o.base.arquivos) o.base.arquivos = criarBase(o).arquivos;
+  if(!o.base.arquivos.curvaFinanceira) o.base.arquivos.curvaFinanceira = { registros:0, dados:[] };
+  if(!o.base.resumo) o.base.resumo = criarBase(o).resumo;
+  o.base.obraId = o.id;
+  return o;
+}
+
+function carregarObras() {
+  let salvas = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  if(!salvas) { for(const k of OLD_KEYS) { const old = JSON.parse(localStorage.getItem(k) || 'null'); if(old) { salvas = old; break; } } }
+  const lista = (salvas || PADRAO_OBRAS).map(normalizar);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+  return lista;
+}
+
+function salvarLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(obras));
+  // Sincroniza com Supabase de forma assíncrona (não bloqueia a UI)
+  if(usuarioAtual) sincronizarComSupabase();
+}
+
+// Controle de debounce para não sobrecarregar o Supabase com saves simultâneos
+let _syncTimer = null;
+function sincronizarComSupabase() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(async () => {
+    await salvarTodasObrasSupabase();
+  }, 1500); // aguarda 1.5s após última edição para salvar
+}
+
+/* ─── SUPABASE: salvar obra completa ─── */
+async function salvarObraSupabase(o) {
+  if(!usuarioAtual) return;
+  const payload = {
+    uid: o.uid,
+    empresa_id: usuarioAtual.perfil === 'CEO' ? (empresaAtualId || usuarioAtual.empresa_id) : usuarioAtual.empresa_id,
+    id_obra: o.id,
+    descricao: o.descricao,
+    engenheiro: o.engenheiro,
+    localizacao: o.localizacao,
+    status: o.status,
+    inicio: o.inicio || null,
+    termino: o.termino || null,
+    contrato: o.contrato || 0,
+    dados: o
+  };
+  const { error } = await sb.rpc('upsert_obra', { payload });
+  if(error) console.error('Erro ao salvar obra no Supabase:', error.message);
+}
+
+async function salvarTodasObrasSupabase() {
+  if(!usuarioAtual) return;
+  for(const o of obras) await salvarObraSupabase(o);
+}
+
+async function carregarObrasSupabase() {
+  if(!usuarioAtual) return [];
+  let query = sb.from('obras').select('dados');
+  if(usuarioAtual.perfil === 'CEO') {
+    // CEO filtra pela empresa selecionada no seletor
+    if(empresaAtualId) query = query.eq('empresa_id', empresaAtualId);
+  } else {
+    query = query.eq('empresa_id', usuarioAtual.empresa_id);
+  }
+  const { data, error } = await query;
+  if(error) { console.error('Erro ao carregar obras:', error.message); return []; }
+  return (data || []).map(r => normalizar(r.dados));
+}
+
+async function excluirObraSupabase(uid) {
+  if(!usuarioAtual) return;
+  const { error } = await sb.rpc('deletar_obra', { p_uid: uid });
+  if(error) console.error('Erro ao excluir obra:', error.message);
+}
+
+/* ─── 4. NAVEGAÇÃO E STATE ─── */
+function abrirPortfolio() { telaAtual='portfolio'; obraAtualId=null; arquivoAtual=null; renderizar(); }
+function abrirObra(uid) { telaAtual='obra'; obraAtualId=uid; arquivoAtual=null; renderizar(); }
+function abrirBanco(uid) { telaAtual='banco'; obraAtualId=uid; arquivoAtual=null; renderizar(); }
+function abrirArquivo(uid, arquivo) { telaAtual='arquivo'; obraAtualId=uid; arquivoAtual=arquivo; renderizar(); }
+function togglePortfolio(e) { e.stopPropagation(); portfolioAberto=!portfolioAberto; renderizarArvore(); }
+function toggleObra(e, uid) { e.stopPropagation(); const o=obras.find(x=>x.uid===uid); if(o){ o.aberto=!o.aberto; salvarLocal(); renderizarArvore(); } }
+function toggleBanco(e, uid) { e.stopPropagation(); const o=obras.find(x=>x.uid===uid); if(o){ o.estrutura[0].aberto=!o.estrutura[0].aberto; salvarLocal(); renderizarArvore(); } }
+
+function alternarTelaCadastro() {
+  const abrir = !document.body.classList.contains('fullscreen-work');
+  document.body.classList.toggle('fullscreen-work', abrir);
+  const btn = $('expandWorkBtn');
+  if(btn) { btn.innerHTML = abrir?'›':'‹'; btn.title = abrir?'Mostrar menu lateral':'Ampliar área de cadastro'; btn.setAttribute('aria-label', btn.title); }
+  setTimeout(() => { window.dispatchEvent(new Event('resize')); const w=document.querySelector('.cronograma-table-wrap'); if(w) w.scrollLeft=0; }, 80);
+}
+
+function renderizar() {
+  renderizarArvore();
+  if(telaAtual==='portfolio') renderPortfolio();
+  else if(telaAtual==='obra') renderObra();
+  else if(telaAtual==='banco') renderBanco();
+  else if(telaAtual==='arquivo') renderArquivo();
+  else if(telaAtual==='ceo') renderPainelCEO();
+}
+
+/* ─── 5. MODAL DE CADASTRO ─── */
+function abrirModal(i=null) {
+  if(!podeEditar()) return;
+  editandoIndex = i;
+  $('modalBg').style.display = 'flex';
+  $('modalTitle').innerText = i===null ? 'Cadastrar Nova Obra' : 'Editar Obra';
+  $('btnExcluir').style.display = i===null ? 'none' : 'inline-block';
+  const o = i===null ? null : obras[i];
+  $('obraId').value = o?.id || '';
+  $('obraDescricao').value = o?.descricao || '';
+  $('obraEngenheiro').value = o?.engenheiro || '';
+  $('obraLocalizacao').value = o?.localizacao || '';
+  $('obraContrato').value = o?.contrato || '';
+  $('obraStatus').value = o?.status || 'Em andamento';
+  $('obraInicio').value = o?.inicio || '';
+  $('obraTermino').value = o?.termino || '';
+  calcularDuracao();
+}
+
+function fecharModal() { $('modalBg').style.display = 'none'; editandoIndex = null; }
+
+function calcularDuracao() {
+  const d = duracaoPorDatas($('obraInicio').value, $('obraTermino').value);
+  $('obraDuracao').value = d ? `${d} dias` : 'Calculada automaticamente';
+}
+
+function salvarObra(e) {
+  e.preventDefault();
+  const dados = {
+    id: $('obraId').value.trim(),
+    descricao: $('obraDescricao').value.trim(),
+    engenheiro: $('obraEngenheiro').value.trim(),
+    localizacao: $('obraLocalizacao').value.trim(),
+    contrato: Number($('obraContrato').value || 0),
+    status: $('obraStatus').value,
+    inicio: $('obraInicio').value,
+    termino: $('obraTermino').value
+  };
+  if(editandoIndex === null) {
+    obras.push(normalizar(dados));
+  } else {
+    const antiga = obras[editandoIndex];
+    obras[editandoIndex] = normalizar({ ...antiga, ...dados, uid:antiga.uid, base:antiga.base, aberto:antiga.aberto });
+  }
+  salvarLocal();
+  salvarObraSupabase(editandoIndex === null ? obras[obras.length-1] : obras[editandoIndex]);
+  fecharModal();
+  renderizar();
+}
+
+function excluirObraAtual() {
+  if(!podeEditar()) return;
+  if(editandoIndex === null) return;
+  if(confirm('Deseja excluir esta obra? Esta ação não pode ser desfeita.')) {
+    const uidExcluir = obras[editandoIndex].uid;
+    obras.splice(editandoIndex, 1);
+    salvarLocal();
+    excluirObraSupabase(uidExcluir);
+    fecharModal();
+    abrirPortfolio();
+  }
+}
+
+/* ─── 6. SIDEBAR / ÁRVORE ─── */
+function statusClass(s) { return s==='Em andamento'?'andamento':s==='Concluída'?'concluida':'nao-iniciada'; }
+
+function renderizarArvore() {
+  const arrow = $('portfolioArrow');
+  const pc = $('portfolioContent');
+  arrow.innerText = portfolioAberto ? '▼' : '▶';
+  pc.innerHTML = '';
+  if(!portfolioAberto) return;
+
+  const obrasOrdenadas = obras.slice().sort((a,b)=>String(a.id||'').localeCompare(String(b.id||''),undefined,{numeric:true}));
+  obrasOrdenadas.forEach((o) => {
+    const i = obras.indexOf(o);
+    const row = document.createElement('div');
+    row.className = 'tree-line ' + (obraAtualId===o.uid && telaAtual==='obra' ? 'active' : '');
+    row.style.setProperty('--level', 0);
+    row.ondblclick = () => abrirModal(i);
+    row.oncontextmenu = ev => { ev.preventDefault(); abrirModal(i); };
+    row.onclick = () => abrirObra(o.uid);
+    row.innerHTML = `<span class="arrow" onclick="toggleObra(event,'${o.uid}')">${o.aberto?'▼':'▶'}</span><span class="folder">📁</span><span class="tree-name">${esc(o.id)} - ${esc(o.descricao)}</span><span class="status-dot ${statusClass(o.status)}"></span>`;
+    pc.appendChild(row);
+
+    if(o.aberto) {
+      const banco = o.estrutura[0];
+      const b = document.createElement('div');
+      b.className = 'tree-line ' + (obraAtualId===o.uid && telaAtual==='banco' ? 'active' : '');
+      b.style.setProperty('--level', 1);
+      b.onclick = () => abrirBanco(o.uid);
+      b.innerHTML = `<span class="arrow" onclick="toggleBanco(event,'${o.uid}')">${banco.aberto?'▼':'▶'}</span><span class="folder">📁</span><span class="tree-name">Banco de Dados</span>`;
+      pc.appendChild(b);
+
+      if(banco.aberto) {
+        banco.filhos.forEach(arq => {
+          const f = document.createElement('div');
+          f.className = 'tree-line ' + (obraAtualId===o.uid && telaAtual==='arquivo' && arquivoAtual===arq.arquivo ? 'active' : '');
+          f.style.setProperty('--level', 2);
+          f.onclick = () => abrirArquivo(o.uid, arq.arquivo);
+          f.innerHTML = `<span class="arrow"></span><span class="fileicon">📄</span><span class="tree-name">${esc(arq.nome)}</span>`;
+          pc.appendChild(f);
+        });
+      }
+    }
+  });
+}
+
+/* ─── 7. PORTFÓLIO ─── */
+function kpis() {
+  return {
+    total: obras.length,
+    and: obras.filter(o=>o.status==='Em andamento').length,
+    nao: obras.filter(o=>o.status==='Não iniciada').length,
+    con: obras.filter(o=>o.status==='Concluída').length
+  };
+}
+
+function portfolioTabela() {
+  return `<div class="portfolio-table"><h2>Obras do Portfólio</h2><div class="table-wrap"><table><thead><tr><th>ID da Obra</th><th>Descrição</th><th>Engenheiro Responsável</th><th>Início LB</th><th>Término LB</th><th>Duração</th><th>Status</th></tr></thead><tbody>${obras.slice().sort((a,b)=>String(a.id||"").localeCompare(String(b.id||""),undefined,{numeric:true})).map(o=>`<tr onclick="abrirObra('${o.uid}')" style="cursor:pointer"><td>${esc(o.id)}</td><td>${esc(o.descricao)}</td><td>${esc(o.engenheiro)}</td><td>${fmt(o.inicio)}</td><td>${fmt(o.termino)}</td><td>${duracao(o)} dias</td><td><span class="status-pill ${o.status==='Em andamento'?'pill-andamento':o.status==='Concluída'?'pill-concluida':'pill-nao-iniciada'}">${esc(o.status)}</span></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function renderPortfolio() {
+  const k = kpis();
+  $('content').innerHTML = `
+    <div class="welcome">Bem-vindos ao</div>
+    <div class="hero-title">PLAN<span style="color:#7dd3fc">ALYTICS</span></div>
+    <p class="hero-text">O Planalytics é a plataforma inteligente para gestão de obras, cronogramas e orçamentos. Tenha controle total do seu portfólio de projetos em um só lugar.</p>
+    <div class="cards">
+      <div class="card"><div class="icon blue">▣</div><div class="num">${k.total}</div><div class="label">Obras Cadastradas</div><div class="sub">Total de obras no portfólio</div></div>
+      <div class="card"><div class="icon green">▦</div><div class="num">${k.and}</div><div class="label" style="color:#116b21">Em Andamento</div><div class="sub">Obras em execução</div></div>
+      <div class="card"><div class="icon orange">◷</div><div class="num">${k.nao}</div><div class="label" style="color:#c75a00">Não Iniciadas</div><div class="sub">Obras a iniciar</div></div>
+      <div class="card"><div class="icon purple">✓</div><div class="num">${k.con}</div><div class="label" style="color:#6d28d9">Concluídas</div><div class="sub">Obras finalizadas</div></div>
+    </div>
+    ${portfolioTabela()}`;
+}
+
+/* ─── 8. PAINEL EXECUTIVO DA OBRA ─── */
+function statusPrazoExecutivo(o, atual) {
+  if(!atual.temCronograma || !duracao(o)) return '<span class="deadline-pill deadline-aguardando">AGUARDANDO DADOS</span>';
+  if(atual.duracao > duracao(o)) return '<span class="deadline-pill deadline-atrasada">ATRASADA</span>';
+  if(atual.duracao < duracao(o)) return '<span class="deadline-pill deadline-adiantada">ADIANTADA</span>';
+  return '<span class="deadline-pill deadline-prazo">NO PRAZO</span>';
+}
+
+function valorLB(v, s='') { return v ? `${v}${s}` : 'Não informado'; }
+
+function cronogramaAtual(o) {
+  const dados = cronogramaDaObra(o).filter(x => x.inicio && x.termino);
+  if(!dados.length) return { temCronograma:false };
+  const inicio = dados.map(x=>x.inicio).sort()[0];
+  const termino = dados.map(x=>x.termino).sort().pop();
+  return { temCronograma:true, inicio, termino, duracao:duracaoPorDatas(inicio,termino) };
+}
+
+
+
+
+
+function renderObra() {
+  const o = obras.find(x => x.uid === obraAtualId);
+  if(!o) return abrirPortfolio();
+  const atual = cronogramaAtual(o);
+  const cF = resumoCurvaFisica(o);
+  const cFin = resumoCurvaFinanceira(o);
+  const crono = resumoCronograma(o);
+
+  const nd = '<span style="color:#94a3b8;font-style:italic;font-weight:400">—</span>';
+  const v = (val, suf='') => (val !== null && val !== undefined && val !== '') ? `${val}${suf}` : nd;
+
+  // Indicador de prazo baseado em duracaoLB - duracao (dias de desvio)
+  const durLB = Number(crono.duracaoLB || 0);
+  const durPL = Number(crono.duracao   || 0);
+  const desvDias = durLB && durPL ? durPL - durLB : null;
+  let prazoHtml = '';
+  if(desvDias === null) {
+    prazoHtml = `<span class="prazo-badge prazo-aguard">SEM DADOS</span>`;
+  } else if(desvDias === 0) {
+    prazoHtml = `<span class="prazo-badge prazo-ok">NO PRAZO</span>`;
+  } else if(desvDias > 0) {
+    prazoHtml = `<span class="prazo-badge prazo-atraso">ATRASADA <span class="prazo-dias">+${desvDias}d</span></span>`;
+  } else {
+    prazoHtml = `<span class="prazo-badge prazo-adiant">ADIANTADA <span class="prazo-dias">${desvDias}d</span></span>`;
+  }
+
+  $('content').innerHTML = `
+    <div class="obra-head">
+      <div><div class="welcome">${esc(o.id)} - ${esc(o.descricao)}</div><h1>PAINEL EXECUTIVO</h1></div>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <button class="back-btn" onclick="abrirPortfolio()">Voltar</button>
+        ${statusPrazoExecutivo(o,atual)}
+        <span class="badge">Execução</span>
+      </div>
+    </div>
+
+    <div class="executive-panel indicadores-panel">
+      <div class="indicadores-header">
+        <div class="indicadores-info">
+          <h2>INDICADORES DA OBRA</h2>
+          <span class="indicadores-local">${esc(o.localizacao)}</span>
+        </div>
+        <div class="indicadores-meta">
+          <div class="indicadores-engenheiro">
+            <span class="ind-meta-label">Engenheiro Responsável</span>
+            <span class="ind-meta-value">${esc(o.engenheiro)}</span>
+          </div>
+          <div class="indicadores-engenheiro">
+            <span class="ind-meta-label">Status da Obra</span>
+            <span class="ind-meta-value">${esc(o.status)}</span>
+          </div>
+          <div class="indicadores-engenheiro">
+            <span class="ind-meta-label">Situação do Prazo</span>
+            ${prazoHtml}
+          </div>
+        </div>
+      </div>
+
+      <div class="indicadores-grid">
+        <div class="indicadores-col lb">
+          <div class="indicadores-col-title">📌 Linha de Base (LB)</div>
+          <div class="ind-row">
+            <span class="ind-label">Duração</span>
+            <span class="ind-val">${v(crono.duracaoLB, ' dias')}</span>
+          </div>
+          <div class="ind-row">
+            <span class="ind-label">Início</span>
+            <span class="ind-val">${v(crono.inicioLB ? fmt(crono.inicioLB) : '')}</span>
+          </div>
+          <div class="ind-row">
+            <span class="ind-label">Término</span>
+            <span class="ind-val">${v(crono.terminoLB ? fmt(crono.terminoLB) : '')}</span>
+          </div>
+        </div>
+
+        <div class="indicadores-divider"></div>
+
+        <div class="indicadores-col pl">
+          <div class="indicadores-col-title">🔄 Planejado (PL)</div>
+          <div class="ind-row">
+            <span class="ind-label">Duração</span>
+            <span class="ind-val ${desvDias !== null ? (desvDias > 0 ? 'val-red' : desvDias < 0 ? 'val-green' : '') : ''}">${v(crono.duracao, ' dias')}</span>
+          </div>
+          <div class="ind-row">
+            <span class="ind-label">Início</span>
+            <span class="ind-val">${v(crono.inicio ? fmt(crono.inicio) : '')}</span>
+          </div>
+          <div class="ind-row">
+            <span class="ind-label">Término</span>
+            <span class="ind-val">${v(crono.termino ? fmt(crono.termino) : '')}</span>
+          </div>
+        </div>
+
+        ${desvDias !== null ? `
+        <div class="indicadores-divider"></div>
+        <div class="indicadores-col desvio">
+          <div class="indicadores-col-title">📊 Desvio (PL − LB)</div>
+          <div class="ind-row">
+            <span class="ind-label">Dias de Desvio</span>
+            <span class="ind-val ${desvDias > 0 ? 'val-red' : desvDias < 0 ? 'val-green' : 'val-ok'}">${desvDias > 0 ? '+' : ''}${desvDias} dias</span>
+          </div>
+          <div class="ind-row">
+            <span class="ind-label">Variação</span>
+            <span class="ind-val ${desvDias > 0 ? 'val-red' : desvDias < 0 ? 'val-green' : 'val-ok'}">${durLB ? (((desvDias/durLB)*100).toFixed(1) + '%') : nd}</span>
+          </div>
+          <div class="ind-row">
+            <span class="ind-label">Situação</span>
+            ${prazoHtml}
+          </div>
+        </div>` : ''}
+      </div>
+    </div>
+
+    ${renderTimelineExecutiva(o)}
+    ${renderResumoAtividadesCronograma(o)}
+    ${renderPerformanceFisica(o)}
+    ${renderPerformanceFinanceira(o)}`;
+}
+
+/* ─── 9. BANCO DE DADOS ─── */
+function renderBanco() {
+  const o = obras.find(x => x.uid === obraAtualId);
+  if(!o) return abrirPortfolio();
+  $('content').innerHTML = `
+    <div class="obra-head">
+      <div><div class="welcome">${esc(o.id)} - ${esc(o.descricao)}</div><h1>BANCO DE DADOS</h1></div>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+        <button class="back-btn" onclick="abrirObra('${o.uid}')">Voltar</button>
+        <span class="badge">Banco Individual</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>ARQUIVOS DA OBRA</h2>
+      <p style="color:#64748b;margin-bottom:1rem">Clique em um arquivo para abrir e editar seus dados.</p>
+      <div class="file-grid">
+        <div class="file-card" onclick="abrirArquivo('${o.uid}','cronograma')">
+          <h3>📋 Cronograma</h3>
+          <p style="color:#64748b;font-size:.88rem;margin-top:.35rem">EAP, datas e avanço físico por atividade</p>
+          <p style="margin-top:.75rem;font-weight:800;color:#073b8e">${cronogramaDaObra(o).length} atividades</p>
+        </div>
+        <div class="file-card" onclick="abrirArquivo('${o.uid}','curvaFisica')">
+          <h3>📈 Curva de Avanço Físico</h3>
+          <p style="color:#64748b;font-size:.88rem;margin-top:.35rem">Previsto x Real x Tendência e HH</p>
+          <p style="margin-top:.75rem;font-weight:800;color:#073b8e">${curvaFisicaDaObra(o).length} registros</p>
+        </div>
+        <div class="file-card" onclick="abrirArquivo('${o.uid}','curvaFinanceira')">
+          <h3>💰 Curva de Avanço Financeira</h3>
+          <p style="color:#64748b;font-size:.88rem;margin-top:.35rem">% e R$ Previsto x Real x Tendência</p>
+          <p style="margin-top:.75rem;font-weight:800;color:#073b8e">${curvaFinanceiraDaObra(o).length} registros</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderArquivo() {
+  const o = obras.find(x => x.uid === obraAtualId);
+  if(!o) return abrirPortfolio();
+  if(arquivoAtual === 'cronograma') return renderCronogramaObra(o);
+  if(arquivoAtual === 'curvaFisica') return renderCurvaFisicaObra(o);
+  if(arquivoAtual === 'curvaFinanceira') return renderCurvaFinanceiraObra(o);
+}
+
+/* ─── 10. CRONOGRAMA - LÓGICA ─── */
+function cronogramaDaObra(o) {
+  if(!o.base) o.base = criarBase(o);
+  if(!o.base.arquivos) o.base.arquivos = criarBase(o).arquivos;
+  if(!o.base.arquivos.cronograma) o.base.arquivos.cronograma = { registros:0, dados:[] };
+  if(!Array.isArray(o.base.arquivos.cronograma.dados)) o.base.arquivos.cronograma.dados = [];
+  return o.base.arquivos.cronograma.dados;
+}
+
+function calcularNivelPorEAP(eap) { return String(eap||'').split('.').filter(p=>p!=='').length; }
+function validarEAP(eap) { const partes = String(eap||'').split('.').filter(p=>p!==''); return partes.length>=1 && partes.length<=5 && partes.every(p=>/^[0-9]+$/.test(p)); }
+function compararEAP(a, b) { const pa=String(a.eap||'').split('.').map(Number), pb=String(b.eap||'').split('.').map(Number); const n=Math.max(pa.length,pb.length); for(let i=0;i<n;i++){const va=pa[i]||0,vb=pb[i]||0;if(va!==vb)return va-vb;} return 0; }
+
+function possuiFilhosCronograma(item, dados) {
+  const e = String(item.eap||'').trim();
+  if(!e || e==='0') return false;
+  return dados.some(x => String(x.eap||'').trim().startsWith(e+'.'));
+}
+
+function filhosCronograma(item, dados) {
+  const e = String(item.eap||'').trim();
+  return dados.filter(x => String(x.eap||'').trim().startsWith(e+'.'));
+}
+
+function menorDataCronograma(lista, campo) {
+  const ds = lista.map(x=>x[campo]).filter(d=>d&&!isNaN(new Date(d+'T00:00:00'))).sort();
+  return ds[0] || '';
+}
+
+function maiorDataCronograma(lista, campo) {
+  const ds = lista.map(x=>x[campo]).filter(d=>d&&!isNaN(new Date(d+'T00:00:00'))).sort();
+  return ds.length ? ds[ds.length-1] : '';
+}
+
+function recalcularCronogramaItem(item) {
+  if(validarEAP(item.eap)) item.nivel = calcularNivelPorEAP(item.eap);
+  item.duracaoLB = duracaoPorDatas(item.inicioLB, item.terminoLB) || '';
+  item.duracao = duracaoPorDatas(item.inicio, item.termino) || '';
+}
+
+function recalcularResumosCronograma(dados) {
+  dados.forEach(x => { x.isResumo = possuiFilhosCronograma(x, dados); });
+  dados.sort((a,b) => calcularNivelPorEAP(String(b.eap||'')) - calcularNivelPorEAP(String(a.eap||'')));
+  dados.forEach(item => {
+    if(!item.isResumo) return;
+    const filhos = filhosCronograma(item, dados);
+    item.inicioLB = menorDataCronograma(filhos, 'inicioLB');
+    item.terminoLB = maiorDataCronograma(filhos, 'terminoLB');
+    item.duracaoLB = duracaoPorDatas(item.inicioLB, item.terminoLB) || '';
+    item.inicio = menorDataCronograma(filhos, 'inicio');
+    item.termino = maiorDataCronograma(filhos, 'termino');
+    item.duracao = duracaoPorDatas(item.inicio, item.termino) || '';
+    item.avancoFisico = filhos.length ? +(filhos.reduce((s,x)=>s+Number(x.avancoFisico||0),0)/filhos.length).toFixed(2) : 0;
+  });
+  dados.sort(compararEAP);
+  return dados;
+}
+
+function ordenarCronograma(o) {
+  const dados = cronogramaDaObra(o);
+  dados.forEach(recalcularCronogramaItem);
+  recalcularResumosCronograma(dados);
+  o.base.arquivos.cronograma.registros = dados.length;
+  salvarLocal();
+}
+
+function resumoCronograma(o) {
+  const dados = cronogramaDaObra(o);
+  const validDate = d => d && !isNaN(new Date(d+'T00:00:00'));
+  const minData = arr => { const ds=arr.filter(validDate).map(d=>new Date(d+'T00:00:00')); return ds.length?new Date(Math.min(...ds)).toISOString().slice(0,10):''; };
+  const maxData = arr => { const ds=arr.filter(validDate).map(d=>new Date(d+'T00:00:00')); return ds.length?new Date(Math.max(...ds)).toISOString().slice(0,10):''; };
+  const inicioLB = minData(dados.map(x=>x.inicioLB));
+  const terminoLB = maxData(dados.map(x=>x.terminoLB));
+  const inicio = minData(dados.map(x=>x.inicio));
+  const termino = maxData(dados.map(x=>x.termino));
+  const avancoCurva = obterAvancoFisicoCurva(o);
+  return { descricao:`${o.id} - ${o.descricao}`, duracaoLB:duracaoPorDatas(inicioLB,terminoLB)||'', inicioLB, terminoLB, avancoFisico:avancoCurva, duracao:duracaoPorDatas(inicio,termino)||'', inicio, termino };
+}
+
+function celResumo(v, tipo='text') {
+  let val = v || '';
+  if(tipo==='percent') val = Number(v||0).toFixed(2);
+  return `<span class="readonly-cell">${val}</span>`;
+}
+
+function adicionarLinhaCronograma(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  const dados = cronogramaDaObra(o);
+  const nivel1count = dados.filter(x=>Number(x.nivel)===1).length;
+  dados.push({ nivel:1, eap:String(nivel1count+1), descricao:'Nova atividade', duracaoLB:'', inicioLB:'', terminoLB:'', avancoFisico:0, duracao:'', inicio:'', termino:'' });
+  ordenarCronograma(o);
+  renderCronogramaObra(o);
+  renderizarArvore();
+}
+
+function atualizarCronograma(uid, idx, campo, valor) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  const dados = cronogramaDaObra(o);
+  const item = dados[idx];
+  if(!item) return;
+  if(campo === 'avancoFisico') {
+    let n = Number(valor||0);
+    if(isNaN(n)) n=0;
+    n = Math.max(0, Math.min(100, n));
+    item[campo] = n;
+  } else {
+    item[campo] = valor;
+  }
+  recalcularCronogramaItem(item);
+  const sx = document.querySelector('.cronograma-table-wrap')?.scrollLeft || 0;
+  const sy = document.querySelector('.main')?.scrollTop || 0;
+  ordenarCronograma(o);
+  renderCronogramaObra(o);
+  setTimeout(() => {
+    const w = document.querySelector('.cronograma-table-wrap');
+    if(w) w.scrollLeft = sx;
+    const m = document.querySelector('.main');
+    if(m) m.scrollTop = sy;
+  }, 0);
+}
+
+function excluirLinhaCronograma(uid, idx) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  cronogramaDaObra(o).splice(idx, 1);
+  ordenarCronograma(o);
+  renderCronogramaObra(o);
+  renderizarArvore();
+}
+
+/* ─── 11. CRONOGRAMA - RENDERIZAÇÃO + GANTT ─── */
+function renderGanttCronograma(atividades) {
+  const monthWidth = 65;
+  const valid = d => d && !isNaN(new Date(d+'T00:00:00'));
+  const normAv = v => { let n=Number(String(v||0).replace('%','').replace(',','.')); if(isNaN(n))n=0; if(n>0&&n<=1)n*=100; return Math.max(0,Math.min(100,+n.toFixed(2))); };
+  const fmtPct = v => { const n=normAv(v); return `${Number.isInteger(n)?n.toFixed(0):n.toFixed(2)}%`; };
+
+  const datas = [];
+  atividades.forEach(a => ['inicioLB','terminoLB','inicio','termino'].forEach(c => { if(valid(a[c])) datas.push(new Date(a[c]+'T00:00:00')); }));
+  if(!datas.length) return `<div class="gantt-panel"><h3>GANTT DO CRONOGRAMA</h3><div class="gantt-empty">Aguardando dados do cronograma para gerar o Gantt</div></div>`;
+
+  const minData = new Date(Math.min(...datas));
+  const maxData = new Date(Math.max(...datas));
+  const min = new Date(minData.getFullYear(), minData.getMonth(), 1);
+  const max = new Date(maxData.getFullYear(), maxData.getMonth()+1, 0);
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesesLista = [];
+  let cur = new Date(min.getFullYear(), min.getMonth(), 1);
+  while(cur <= max) { mesesLista.push(new Date(cur)); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
+
+  const ganttWidth = Math.max(monthWidth, mesesLista.length*monthWidth);
+  const totalDias = Math.max(1, (max-min)/(1000*60*60*24)+1);
+  const pxPorDia = ganttWidth/totalDias;
+  const posPx = d => valid(d) ? Math.max(0,((new Date(d+'T00:00:00')-min)/(1000*60*60*24))*pxPorDia) : 0;
+  const widPx = (i,f) => { if(!valid(i)||!valid(f)) return 0; const ini=new Date(i+'T00:00:00'),fim=new Date(f+'T00:00:00'); return Math.max(6,(((fim-ini)/(1000*60*60*24)+1)*pxPorDia)); };
+
+  const mesesHtml = mesesLista.map((m,idx)=>`<span class="gantt-month" style="left:${idx*monthWidth}px">${meses[m.getMonth()]}/${m.getFullYear()}</span>`).join('');
+
+  const barra = (tipo,i,f,av=0) => {
+    if(!valid(i)||!valid(f)) return '';
+    const left=posPx(i), width=widPx(i,f), pct=normAv(av), pctLabel=fmtPct(av);
+    return `<div class="gantt-bar gantt-${tipo.toLowerCase()}" style="left:${left}px;width:${width}px">
+      <span class="gantt-letter">${tipo}</span>
+      ${tipo==='R'?`<span class="gantt-progress" style="width:${pct}%"></span><span class="gantt-percent-label">${pctLabel}</span>`:''}
+      <span class="gantt-date">${fmt(f)}</span>
+    </div>`;
+  };
+
+  const linhas = atividades.map(a => {
+    const nivel = calcularNivelPorEAP(a.eap||'1');
+    return `<div class="gantt-row ${a.isResumo?'gantt-summary':''}" style="--gantt-width:${ganttWidth}px">
+      <div class="gantt-info" style="padding-left:${Math.max(0,nivel-1)*1.1}rem">${esc(a.eap||'')}<span class="gantt-desc">${esc(a.descricao||'Sem descrição')}</span></div>
+      <div class="gantt-area">${barra('P',a.inicioLB,a.terminoLB)}${barra('R',a.inicio,a.termino,a.avancoFisico)}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="gantt-panel"><h3>GANTT DO CRONOGRAMA</h3><div class="gantt-wrap" style="--gantt-width:${ganttWidth}px"><div class="gantt-months"><div>Atividade</div><div class="gantt-scale">${mesesHtml}</div></div>${linhas||'<div class="gantt-empty">Nenhuma atividade cadastrada.</div>'}</div></div>`;
+}
+
+function renderCronogramaObra(o) {
+  ordenarCronograma(o);
+  const dados = cronogramaDaObra(o);
+  const res = resumoCronograma(o);
+
+  const linhasTabela = dados.length ? dados.map((r,i) => {
+    const isRes = !!r.isResumo;
+    const dis = isRes || !podeEditar() ? 'disabled' : '';
+    const nivel = calcularNivelPorEAP(r.eap||'1');
+    return `<tr class="${isRes?'cronograma-resumo-eap':''}">
+      <td class="nivel-cell"><input class="readonly-input" disabled type="number" value="${esc(nivel)}"></td>
+      <td class="eap-cell"><input value="${esc(r.eap||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'eap',this.value)"></td>
+      <td><input style="padding-left:${Math.max(0,nivel-1)*1.1}rem" value="${esc(r.descricao||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'descricao',this.value)"></td>
+      <td><div class="duration-wrap"><input class="readonly-input" disabled type="number" value="${esc(r.duracaoLB||'')}"><span class="duration-suffix">d</span></div></td>
+      <td class="date-cell"><input ${dis} type="date" value="${esc(r.inicioLB||'')}" onblur="atualizarCronograma('${o.uid}',${i},'inicioLB',this.value)"></td>
+      <td class="date-cell"><input ${dis} type="date" value="${esc(r.terminoLB||'')}" onblur="atualizarCronograma('${o.uid}',${i},'terminoLB',this.value)"></td>
+      <td><div class="percent-wrap"><input ${dis} type="number" min="0" max="100" step="0.01" placeholder="0" value="${esc(r.avancoFisico||0)}" oninput="if(Number(this.value)>100)this.value=100;if(Number(this.value)<0)this.value=0" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'avancoFisico',this.value)"><span class="percent-suffix">%</span></div></td>
+      <td><div class="duration-wrap"><input class="readonly-input" disabled type="number" value="${esc(r.duracao||'')}"><span class="duration-suffix">d</span></div></td>
+      <td class="date-cell"><input ${dis} type="date" value="${esc(r.inicio||'')}" onblur="atualizarCronograma('${o.uid}',${i},'inicio',this.value)"></td>
+      <td class="date-cell"><input ${dis} type="date" value="${esc(r.termino||'')}" onblur="atualizarCronograma('${o.uid}',${i},'termino',this.value)"></td>
+      <td class="acao-cell"><button class="delete-row-btn edit-only" onclick="excluirLinhaCronograma('${o.uid}',${i})">Excluir</button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="11" style="text-align:center;color:#64748b;padding:1.5rem">Nenhuma atividade cadastrada.</td></tr>`;
+
+  $('content').innerHTML = `
+    <div class="obra-head">
+      <div><div class="welcome">${esc(o.id)} - ${esc(o.descricao)}</div><h1>CRONOGRAMA DA OBRA</h1></div>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <button class="back-btn" onclick="abrirBanco('${o.uid}')">Voltar</button>
+        <span class="badge">Cronograma</span>
+      </div>
+    </div>
+    <div class="cronograma-panel">
+      <div class="cronograma-head">
+        <div><h2>CRONOGRAMA DA OBRA</h2><p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada.</p></div>
+        <div class="cronograma-actions-right">
+          ${podeEditar()?`<button class="add-row-btn" class="edit-only-wrap" onclick="adicionarLinhaCronograma('${o.uid}')">＋ Adicionar Linha</button><button class="add-row-btn import-btn" class="edit-only-wrap" onclick="selecionarImportacaoCronograma('${o.uid}')">Importar Cronograma</button><button class="add-row-btn clear-btn" class="edit-only-wrap" onclick="limparCronograma('${o.uid}')">🗑 Limpar Dados</button>`:''}<button class="add-row-btn default-btn" onclick="baixarModeloDefaultCronograma()">Baixar Modelo Default</button>
+          <input id="cronogramaImportInput" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarCronogramaExcel(event,'${o.uid}')">
+        </div>
+      </div>
+      <div class="cronograma-table-wrap">
+        <table class="cronograma-table">
+          <thead><tr><th>NÍVEL</th><th>EAP</th><th>DESCRIÇÃO</th><th>DUR. LB</th><th>INÍCIO LB</th><th>TÉRMINO LB</th><th>AV. FÍS %</th><th>DURAÇÃO</th><th>INÍCIO</th><th>TÉRMINO</th><th>AÇÕES</th></tr></thead>
+          <tbody>
+            <tr class="cronograma-summary-row">
+              <td>${celResumo('0')}</td><td>${celResumo('0')}</td><td>${celResumo(res.descricao)}</td>
+              <td>${celResumo(res.duracaoLB?res.duracaoLB+' d':'')}</td><td>${celResumo(res.inicioLB?fmt(res.inicioLB):'')}</td><td>${celResumo(res.terminoLB?fmt(res.terminoLB):'')}</td>
+              <td>${celResumo(res.avancoFisico,'percent')}</td><td>${celResumo(res.duracao?res.duracao+' d':'')}</td><td>${celResumo(res.inicio?fmt(res.inicio):'')}</td><td>${celResumo(res.termino?fmt(res.termino):'')}</td>
+              <td class="acao-cell">—</td>
+            </tr>
+            ${linhasTabela}
+          </tbody>
+        </table>
+      </div>
+      ${renderGanttCronograma(dados)}
+    </div>`;
+}
+
+/* ─── 12. TIMELINE EXECUTIVA (EAP GANTT) ─── */
+function renderTimelineExecutiva(o) {
+  const monthWidth = 72;
+  const dados = cronogramaDaObra(o) || [];
+  dados.forEach(recalcularCronogramaItem);
+  recalcularResumosCronograma(dados);
+
+  const res = resumoCronograma(o);
+  const nivel0 = res ? { eap:'0', descricao:res.descricao, inicioLB:res.inicioLB, terminoLB:res.terminoLB, inicio:res.inicio, termino:res.termino, avancoFisico:res.avancoFisico||0, nivel:0, isResumo:true } : null;
+  const nivel1 = dados.filter(a => { const e=String(a.eap||'').trim(); return e && e!=='0' && !e.includes('.') && calcularNivelPorEAP(e)===1; });
+  const linhasDados = [...(nivel0?[nivel0]:[]), ...nivel1];
+
+  const valid = d => d && !isNaN(new Date(d+'T00:00:00'));
+  const datas = [];
+  linhasDados.forEach(a => ['inicioLB','terminoLB','inicio','termino'].forEach(c => { if(valid(a[c])) datas.push(new Date(a[c]+'T00:00:00')); }));
+
+  if(!linhasDados.length || !datas.length) {
+    return `<section class="executive-panel timeline-exec-section"><div class="executive-title-row"><h2>EAP (GANTT)</h2></div><div class="timeline-exec-subtitle">Visão macro do cronograma com previsto x real</div><div class="timeline-exec-empty">Nenhum dado encontrado no cronograma.</div></section>`;
+  }
+
+  const minData = new Date(Math.min(...datas));
+  const maxData = new Date(Math.max(...datas));
+  const min = new Date(minData.getFullYear(), minData.getMonth(), 1);
+  const max = new Date(maxData.getFullYear(), maxData.getMonth()+1, 0);
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesesLista = [];
+  let cur = new Date(min.getFullYear(), min.getMonth(), 1);
+  while(cur <= max) { mesesLista.push(new Date(cur)); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
+
+  const timelineWidth = Math.max(monthWidth, mesesLista.length*monthWidth);
+  const totalDias = Math.max(1, (max-min)/(1000*60*60*24)+1);
+  const pxPorDia = timelineWidth/totalDias;
+  const posPx = d => valid(d) ? Math.max(0,((new Date(d+'T00:00:00')-min)/(1000*60*60*24))*pxPorDia) : 0;
+  const widPx = (i,f) => { if(!valid(i)||!valid(f)) return 0; const ini=new Date(i+'T00:00:00'),fim=new Date(f+'T00:00:00'); return Math.max(8,(((fim-ini)/(1000*60*60*24)+1)*pxPorDia)); };
+
+  const normAv = v => { if(v===null||v===undefined||v==='') return 0; let n=Number(String(v).replace('%','').replace(',','.')); if(isNaN(n))n=0; if(n>0&&n<=1)n*=100; return Math.max(0,Math.min(100,+n.toFixed(2))); };
+  const fmtPct = v => { const n=normAv(v); return `${Number.isInteger(n)?n.toFixed(0):n.toFixed(2)}%`; };
+
+  const mesesHtml = mesesLista.map((m,idx)=>`<span class="timeline-exec-month" style="left:${idx*monthWidth}px">${meses[m.getMonth()]}/${m.getFullYear()}</span>`).join('');
+
+  const barra = (tipo, i, f, av) => {
+    if(!valid(i)||!valid(f)) { return tipo==='R' ? `<div class="timeline-exec-sem-real">sem real</div>` : ''; }
+    const left=posPx(i), width=widPx(i,f), pct=normAv(av), pctLabel=fmtPct(av);
+    return `<div class="timeline-exec-bar ${tipo.toLowerCase()}" style="left:${left}px;width:${width}px">
+      <span class="timeline-exec-label">${tipo}</span>
+      ${tipo==='R'?`<span class="timeline-exec-fill" style="width:${pct}%"></span><span class="gantt-percent-label">${pctLabel}</span>`:''}
+      <span class="timeline-exec-date">${fmt(f)}</span>
+    </div>`;
+  };
+
+  const linhas = linhasDados.map(a => {
+    const nivel = Number(a.nivel || calcularNivelPorEAP(a.eap||'1'));
+    return `<div class="timeline-exec-row nivel${nivel}" style="--timeline-width:${timelineWidth}px">
+      <div class="timeline-exec-info"><span class="timeline-exec-name">${esc(a.descricao||'Sem descrição')}</span></div>
+      <div class="timeline-exec-area">${barra('P',a.inicioLB,a.terminoLB,a.avancoFisico)}${barra('R',a.inicio,a.termino,a.avancoFisico)}</div>
+    </div>`;
+  }).join('');
+
+  return `<section class="executive-panel timeline-exec-section">
+    <div class="executive-title-row"><h2>EAP (GANTT)</h2></div>
+    <div class="timeline-exec-subtitle">Visão macro do cronograma — Previsto x Real</div>
+    <div class="timeline-exec-wrap" style="--timeline-width:${timelineWidth}px">
+      <div class="timeline-exec-months"><div>Atividade</div><div class="timeline-exec-scale">${mesesHtml}</div></div>
+      ${linhas}
+    </div>
+  </section>`;
+}
+
+function renderResumoAtividadesCronograma(o) {
+  const dados = cronogramaDaObra(o) || [];
+  const possuiFilhos = item => { const eapPai=String(item.eap||'').trim(); if(!eapPai||eapPai==='0') return true; return dados.some(f=>String(f.eap||'').trim().startsWith(eapPai+'.')); };
+  const atividades = dados.filter(a => { const eap=String(a.eap||'').trim(); return eap && eap!=='0' && !possuiFilhos(a); });
+  const total = atividades.length;
+  // Normaliza avancoFisico: aceita tanto formato decimal (0-1) quanto percentual (0-100)
+  const normAv = a => { const v=Number(a.avancoFisico||0); return v>0&&v<=1 ? v*100 : v; };
+  const concluidas = atividades.filter(a=>normAv(a)>=100).length;
+  const andamento = atividades.filter(a=>normAv(a)>0&&normAv(a)<100).length;
+  const pendentes = atividades.filter(a=>normAv(a)<=0).length;
+  return `<div class="activity-summary-panel">
+    <div class="activity-summary-grid">
+      <div class="activity-summary-card"><span class="activity-summary-label">Qtd Atividades</span><strong>${total}</strong><small>Sem considerar resumos</small></div>
+      <div class="activity-summary-card pending"><span class="activity-summary-label">Pendentes</span><strong>${pendentes}</strong><small>Avanço 0%</small></div>
+      <div class="activity-summary-card progress"><span class="activity-summary-label">Em Andamento</span><strong>${andamento}</strong><small>Entre 1% e 99%</small></div>
+      <div class="activity-summary-card done"><span class="activity-summary-label">Concluídas</span><strong>${concluidas}</strong><small>Avanço 100%</small></div>
+    </div>
+  </div>`;
+}
+
+/* ─── 13. CURVA FÍSICA ─── */
+function curvaFisicaDaObra(o) {
+  if(!o.base) o.base = criarBase(o);
+  if(!o.base.arquivos) o.base.arquivos = criarBase(o).arquivos;
+  if(!o.base.arquivos.curvaFisica) o.base.arquivos.curvaFisica = { registros:0, dados:[] };
+  return o.base.arquivos.curvaFisica.dados;
+}
+
+function salvarCurvaFisica(o) { o.base.arquivos.curvaFisica.registros = curvaFisicaDaObra(o).length; salvarLocal(); }
+
+function normalizarPercentualCurva(valor, comFormato, celulaXLSX) {
+  if(valor===null||valor===undefined||valor==='') return null;
+  let s = String(valor).trim();
+  let tipoOriginal = typeof valor;
+  let formatoExcel = (celulaXLSX&&celulaXLSX.z) ? String(celulaXLSX.z) : '';
+  if(s.endsWith('%')) { s=s.slice(0,-1).replace(',','.').trim(); return Math.max(0,Math.min(100,parseFloat(s))); }
+  s = s.replace(',','.');
+  let n = parseFloat(s);
+  if(isNaN(n)) return null;
+  if(tipoOriginal==='number' && formatoExcel.includes('%')) n = n*100;
+  return Math.max(0,Math.min(100,n));
+}
+
+function normalizarHHCurva(valor) {
+  if(valor===null||valor===undefined||valor==='') return null;
+  let s = String(valor).trim().replace(/\s/g,'');
+  if(s.includes(',')&&s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+  else s=s.replace(',','.');
+  const n = Number(s);
+  return isNaN(n) ? null : +n.toFixed(2);
+}
+
+function formatarPercentualCurva(valor) {
+  const n = normalizarPercentualCurva(valor, false);
+  if(n===null) return '-';
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
+}
+
+function formatarHHCurva(valor) {
+  const n = normalizarHHCurva(valor);
+  if(n===null) return '-';
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function percentualCurvaDashboardPorCampo(row, campo) {
+  const aliases = { previsto:['previsto','% Previsto'], real:['real','% Real'], tendencia:['tendencia','% Tendência','% Tendencia'] };
+  let v = null;
+  for(const k of (aliases[campo]||[campo])) { if(Object.prototype.hasOwnProperty.call(row,k)) { v=row[k]; break; } }
+  v = normalizarPercentualCurva(v, false);
+  if(v===null||isNaN(v)) return null;
+  if(v>0&&v<=1) return v*100;
+  return Math.max(0,Math.min(100,v));
+}
+
+function hhCurvaPorCampo(row, campo) {
+  const aliases = { hhPrevisto:['hhPrevisto','HH Previsto'], hhReal:['hhReal','HH Real'] };
+  let v = '';
+  for(const k of (aliases[campo]||[campo])) { if(Object.prototype.hasOwnProperty.call(row,k)) { v=row[k]; break; } }
+  return normalizarHHCurva(v);
+}
+
+function valorAtualCurvaFisica(o) {
+  const dados = curvaFisicaDaObra(o).slice().filter(x=>x).sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')));
+  for(let i=dados.length-1;i>=0;i--) { const r=percentualCurvaDashboardPorCampo(dados[i],'real'); if(r!==null) return r; }
+  return 0;
+}
+
+function obterAvancoFisicoCurva(o) { try { return valorAtualCurvaFisica(o); } catch(e) { return 0; } }
+
+function resumoCurvaFisica(o) {
+  const dados = curvaFisicaDaObra(o).slice().filter(x=>x).sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')));
+  let ultimoPrev=null, ultimoReal=null, ultimoTend=null, previstoNaDataDoReal=null, somaHHPrev=0, somaHHReal=0;
+  dados.forEach(x => {
+    const p=percentualCurvaDashboardPorCampo(x,'previsto');
+    const r=percentualCurvaDashboardPorCampo(x,'real');
+    const t=percentualCurvaDashboardPorCampo(x,'tendencia');
+    const hp=hhCurvaPorCampo(x,'hhPrevisto');
+    const hr=hhCurvaPorCampo(x,'hhReal');
+    if(p!==null) ultimoPrev=p;
+    if(t!==null) ultimoTend=t;
+    if(r!==null) { ultimoReal=r; previstoNaDataDoReal=(p!==null)?p:ultimoPrev; }
+    if(hp!==null) somaHHPrev+=hp;
+    if(hr!==null&&hr!==0) somaHHReal+=hr;
+  });
+  const previstoResumo = previstoNaDataDoReal??ultimoPrev??0;
+  const realResumo = ultimoReal??0;
+  return { previsto:previstoResumo, real:realResumo, tendencia:ultimoTend??0, desvio:+(previstoResumo-realResumo).toFixed(10), hhPrevisto:+somaHHPrev.toFixed(2), hhReal:+somaHHReal.toFixed(2) };
+}
+
+function formatarDataBR(data) { if(!data) return ''; const [y,m,d]=String(data).split('-'); return d&&m&&y?`${d}/${m}/${y}`:String(data); }
+
+function renderGraficoPerformanceFisica(o) {
+  let dados = curvaFisicaDaObra(o).slice().filter(x=>x&&x.data).sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')));
+  if(!dados.length) return `<div class="chart-empty">Aguardando dados da curva física</div>`;
+
+  dados = dados.map(d=>({
+    data:d.data,
+    previsto:percentualCurvaDashboardPorCampo(d,'previsto'),
+    real:percentualCurvaDashboardPorCampo(d,'real'),
+    tendencia:percentualCurvaDashboardPorCampo(d,'tendencia'),
+    hhPrevisto:hhCurvaPorCampo(d,'hhPrevisto'),
+    hhReal:hhCurvaPorCampo(d,'hhReal')
+  }));
+
+  const w=1180,h=390,padL=58,padR=68,padT=24,padB=70;
+  const plotW=w-padL-padR, plotH=h-padT-padB, baseY=padT+plotH;
+  const hhVals=[]; dados.forEach(d=>{ if(d.hhPrevisto!==null) hhVals.push(d.hhPrevisto); if(d.hhReal!==null&&d.hhReal!==0) hhVals.push(d.hhReal); });
+  const maxHH = Math.ceil(Math.max(1,...hhVals)/100)*100;
+  const xPos = i => padL + (dados.length===1?plotW/2:(i*(plotW/(dados.length-1))));
+  const yPct = v => padT+plotH-(Number(v)/100)*plotH;
+  const yHH = v => padT+plotH-(Number(v)/maxHH)*plotH;
+  const fmtPct = v => v===null?'-':v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
+  const fmtHH = v => v===null?'-':v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  function polyline(campo, classe) {
+    let segs=[], atual=[];
+    dados.forEach((d,i)=>{ const v=d[campo]; if(v===null||v===undefined||isNaN(v)){if(atual.length)segs.push(atual);atual=[];}else{atual.push({x:xPos(i),y:yPct(v),v,d});} });
+    if(atual.length) segs.push(atual);
+    return segs.map(seg=>{
+      const pts=seg.map(p=>`${p.x},${p.y}`).join(' ');
+      const circles=seg.map(p=>`<circle class="${classe}-dot" cx="${p.x}" cy="${p.y}" r="4"><title>${fmtPct(p.v)} — ${formatarDataBR(p.d.data)}</title></circle>`).join('');
+      return `<polyline points="${pts}" class="pf-line ${classe}"></polyline>${circles}`;
+    }).join('');
+  }
+
+  const barW = Math.max(5,Math.min(12,plotW/(dados.length*4)));
+  const barras = dados.map((d,i)=>{
+    const x=xPos(i);
+    return `${d.hhPrevisto!==null?`<rect class="pf-bar-prev" x="${x-barW-1}" y="${yHH(d.hhPrevisto)}" width="${barW}" height="${baseY-yHH(d.hhPrevisto)}" rx="2"><title>HH Prev: ${fmtHH(d.hhPrevisto)} — ${formatarDataBR(d.data)}</title></rect>`:''}${d.hhReal!==null&&d.hhReal!==0?`<rect class="pf-bar-real" x="${x+1}" y="${yHH(d.hhReal)}" width="${barW}" height="${baseY-yHH(d.hhReal)}" rx="2"><title>HH Real: ${fmtHH(d.hhReal)} — ${formatarDataBR(d.data)}</title></rect>`:''}`;
+  }).join('');
+
+  const labels = dados.map((d,i)=>{ const [y,m,day]=String(d.data).split('-'); const lab=day&&m?`${day}-${m}`:String(d.data); return `<text x="${xPos(i)}" y="${h-30}" text-anchor="end" transform="rotate(-55 ${xPos(i)} ${h-30})" class="pf-axis-label">${lab}</text>`; }).join('');
+  const pctGrid = [0,10,20,30,40,50,60,70,80,90,100].map(v=>`<line x1="${padL}" y1="${yPct(v)}" x2="${w-padR}" y2="${yPct(v)}" class="pf-grid"></line><text x="${padL-10}" y="${yPct(v)+4}" text-anchor="end" class="pf-axis-label">${v}</text>`).join('');
+  const hhTicks = [0,.2,.4,.6,.8,1].map(f=>{ const v=maxHH*f; return `<text x="${w-padR+12}" y="${yHH(v)+4}" class="pf-axis-label">${v.toLocaleString('pt-BR',{maximumFractionDigits:0})}</text>`; }).join('');
+
+  let ultimoRealIndex=-1;
+  for(let i=dados.length-1;i>=0;i--){ if(dados[i].real!==null&&dados[i].real!==undefined&&!isNaN(dados[i].real)){ultimoRealIndex=i;break;} }
+  const marcoUltimoReal = ultimoRealIndex>=0 ? (()=>{
+    const d=dados[ultimoRealIndex], x=xPos(ultimoRealIndex), p=d.previsto, r=d.real;
+    const yR=yPct(r), yP=(p!==null&&!isNaN(p))?yPct(p):null;
+    const labelRealY=Math.max(padT+14,yR-14), labelPrevY=yP!==null?Math.max(padT+14,yP-14):null;
+    return `${yP!==null?`<circle cx="${x}" cy="${yP}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"><title>Último Prev: ${fmtPct(p)}</title></circle>`:''}<circle cx="${x}" cy="${yR}" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="3"><title>Último Real: ${fmtPct(r)}</title></circle>${yP!==null?`<text x="${x}" y="${labelPrevY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#2563eb">${fmtPct(p)}</text>`:''}<text x="${x}" y="${labelRealY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#ef4444">${fmtPct(r)}</text>`;
+  })() : '';
+
+  return `<div class="pf-chart-wrap">
+    <div class="pf-legend">
+      <span><i class="legend-dot previsto"></i>% Previsto</span>
+      <span><i class="legend-dot real"></i>% Real</span>
+      <span><i class="legend-dot tendencia"></i>% Tendência</span>
+      <span><i class="bar prev"></i>HH Previsto</span>
+      <span><i class="bar real"></i>HH Real</span>
+    </div>
+    <svg class="pf-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+      ${pctGrid}
+      <line x1="${padL}" y1="${baseY}" x2="${w-padR}" y2="${baseY}" class="pf-axis"></line>
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${baseY}" class="pf-axis"></line>
+      <line x1="${w-padR}" y1="${padT}" x2="${w-padR}" y2="${baseY}" class="pf-axis"></line>
+      <text x="18" y="${padT+plotH/2}" transform="rotate(-90 18 ${padT+plotH/2})" class="pf-axis-title">Avanço %</text>
+      <text x="${w-18}" y="${padT+plotH/2}" transform="rotate(90 ${w-18} ${padT+plotH/2})" class="pf-axis-title">HH</text>
+      ${hhTicks}${barras}
+      ${polyline('previsto','pf-previsto')}
+      ${polyline('real','pf-real')}
+      ${polyline('tendencia','pf-tendencia')}
+      ${marcoUltimoReal}
+      ${labels}
+    </svg>
+  </div>`;
+}
+
+function renderPerformanceFisica(o) {
+  const c = resumoCurvaFisica(o);
+  return `<div class="performance-panel physical-performance">
+    <h2>PERFORMANCE FÍSICA</h2>
+    <div class="physical-cards">
+      <div class="physical-card"><span class="physical-label">Avanço Previsto</span><span class="physical-value">${formatarPercentualCurva(c.previsto)}</span></div>
+      <div class="physical-card"><span class="physical-label">Avanço Real</span><span class="physical-value">${formatarPercentualCurva(c.real)}</span></div>
+      <div class="physical-card"><span class="physical-label">Desvio<span class="desvio-title-dot ${c.desvio>0?'red':'green'}"></span></span><span class="physical-value">${formatarPercentualCurva(c.desvio)}</span></div>
+      <div class="physical-card"><span class="physical-label">HH Previsto</span><span class="physical-value">${formatarHHCurva(c.hhPrevisto)}</span></div>
+      <div class="physical-card"><span class="physical-label">HH Real</span><span class="physical-value">${formatarHHCurva(c.hhReal)}</span></div>
+    </div>
+    <div class="physical-chart">
+      <h3>CURVA DE AVANÇO FÍSICO</h3>
+      ${renderGraficoPerformanceFisica(o)}
+    </div>
+  </div>`;
+}
+
+function adicionarLinhaCurvaFisica(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x=>x.uid===uid||String(x.id)===String(uid));
+  if(!o) { alert('Obra não encontrada.'); return; }
+  curvaFisicaDaObra(o).push({ data:'', previsto:'', real:'', tendencia:'', hhPrevisto:'', hhReal:'' });
+  salvarCurvaFisica(o);
+  renderCurvaFisicaObra(o);
+}
+
+function atualizarCurvaFisica(uid, i, campo, valor) {
+  if(!podeEditar()) return;
+  const o = obras.find(x=>x.uid===uid||String(x.id)===String(uid));
+  if(!o) return;
+  const dados = curvaFisicaDaObra(o);
+  if(!dados[i]) return;
+  if(['previsto','real','tendencia'].includes(campo)) { const n=normalizarPercentualCurva(valor,false); dados[i][campo]=(n===null?'':n); }
+  else if(['hhPrevisto','hhReal'].includes(campo)) { const n=normalizarHHCurva(valor); dados[i][campo]=(n===null?'':n); }
+  else dados[i][campo]=valor;
+  salvarCurvaFisica(o);
+  renderCurvaFisicaObra(o);
+}
+
+function excluirLinhaCurvaFisica(uid, idx) {
+  if(!podeEditar()) return;
+  const o = obras.find(x=>x.uid===uid);
+  if(!o) return;
+  curvaFisicaDaObra(o).splice(idx,1);
+  salvarCurvaFisica(o);
+  renderCurvaFisicaObra(o);
+}
+
+function renderCurvaFisicaObra(o) {
+  const dados = curvaFisicaDaObra(o);
+  const linhas = dados.map((r,i)=>`<tr>
+    <td><input type="date" value="${esc(r.data||'')}" onchange="atualizarCurvaFisica('${o.uid}',${i},'data',this.value)"></td>
+    <td><input value="${esc(r.previsto??'')}" placeholder="0%" onchange="atualizarCurvaFisica('${o.uid}',${i},'previsto',this.value)"></td>
+    <td><input value="${esc(r.real??'')}" placeholder="0%" onchange="atualizarCurvaFisica('${o.uid}',${i},'real',this.value)"></td>
+    <td><input value="${esc(r.tendencia??'')}" placeholder="0%" onchange="atualizarCurvaFisica('${o.uid}',${i},'tendencia',this.value)"></td>
+    <td><input value="${esc(r.hhPrevisto??'')}" placeholder="0,00" onchange="atualizarCurvaFisica('${o.uid}',${i},'hhPrevisto',this.value)"></td>
+    <td><input value="${esc(r.hhReal??'')}" placeholder="0,00" onchange="atualizarCurvaFisica('${o.uid}',${i},'hhReal',this.value)"></td>
+    <td><button class="delete-btn edit-only" onclick="excluirLinhaCurvaFisica('${o.uid}',${i})">Excluir</button></td>
+  </tr>`).join('');
+  $('content').innerHTML = `
+    <div class="obra-head">
+      <div><div class="welcome">${esc(o.id)} - ${esc(o.descricao)}</div><h1>CURVA DE AVANÇO FÍSICO</h1></div>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+        <button class="back-btn" onclick="abrirBanco('${o.uid}')">Voltar</button>
+        <span class="badge">Banco Individual</span>
+      </div>
+    </div>
+    <div class="cronograma-panel">
+      <div class="cronograma-head">
+        <div><h2>CURVA DE AVANÇO FÍSICO</h2><p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada.</p></div>
+        <div class="cronograma-actions-right">
+          ${podeEditar()?`<button class="add-row-btn" class="edit-only-wrap" onclick="adicionarLinhaCurvaFisica('${o.uid}')">＋ Adicionar Linha</button><button class="add-row-btn import-btn" class="edit-only-wrap" onclick="selecionarImportacaoCurvaFisica('${o.uid}')">Importar Curva</button><button class="add-row-btn clear-btn" class="edit-only-wrap" onclick="limparCurvaFisica('${o.uid}')">🗑 Limpar Dados</button>`:''}<button class="add-row-btn default-btn" onclick="baixarModeloDefaultCurvaFisica()">Baixar Modelo Default</button>
+          <input id="curvaFisicaImportInput" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarCurvaFisicaExcel(event,'${o.uid}')">
+        </div>
+      </div>
+      <div class="cronograma-table-wrap">
+        <table class="cronograma-table">
+          <thead><tr><th>DATA</th><th>% Previsto</th><th>% Real</th><th>% Tendência</th><th>HH Previsto</th><th>HH Real</th><th>AÇÕES</th></tr></thead>
+          <tbody>${linhas||'<tr><td colspan="7" style="text-align:center;color:#64748b;font-weight:800;padding:1rem">Nenhum dado cadastrado.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ─── 14. CURVA FINANCEIRA ─── */
+function curvaFinanceiraDaObra(o) {
+  if(!o.base) o.base = criarBase(o);
+  if(!o.base.arquivos) o.base.arquivos = criarBase(o).arquivos;
+  if(!o.base.arquivos.curvaFinanceira) o.base.arquivos.curvaFinanceira = { registros:0, dados:[] };
+  return o.base.arquivos.curvaFinanceira.dados;
+}
+
+function salvarCurvaFinanceira(o) { o.base.arquivos.curvaFinanceira.registros = curvaFinanceiraDaObra(o).length; salvarLocal(); }
+
+function resumoCurvaFinanceira(o) {
+  const dados = curvaFinanceiraDaObra(o).filter(Boolean);
+  let realTotal = 0, previstoTotal = 0, ultimaReal = -1;
+  dados.forEach((r, i) => {
+    previstoTotal += Number(r.rsPrevisto || 0);
+    const rr = Number(r.rsReal || 0);
+    realTotal += rr;
+    if(!isNaN(Number(r.rsReal)) && Number(r.rsReal) !== 0) ultimaReal = i;
+  });
+  // soma de rsPrevisto somente até a última linha que tem rsReal informado
+  let previstoAteReal = 0;
+  for(let i = 0; i <= ultimaReal; i++) previstoAteReal += Number((dados[i]||{}).rsPrevisto || 0);
+  return { previstoTotal, previstoAteReal, realTotal, saldo: previstoAteReal - realTotal, dados };
+}
+
+// Converte valor decimal (0.0–1.0) para percentual (0–100). Robusto para ambos os formatos.
+function cfPct(v) {
+  if(v===''||v===null||v===undefined) return null;
+  const n = Number(v);
+  if(isNaN(n)) return null;
+  // Se o valor já está na faixa 0–1 (decimal), multiplica por 100
+  // Se já está na faixa 1–100 (percentual direto), usa como está
+  return n <= 1 ? +(n * 100).toFixed(4) : +n.toFixed(4);
+}
+
+function cfNorm(v) { if(v===''||v===null||v===undefined) return null; return Number(v)||0; }
+
+function normalizarCurvaFinanceiraDados(dados) {
+  if(!Array.isArray(dados)) return dados;
+  const ultimoReal = dados.reduce((a,r,i)=>{ const v=Number(r.realAc??r.real??''); return (!isNaN(v)&&v!==0)?i:a; },-1);
+  return dados.map((r,i)=>{
+    const clone = {...r};
+    if(clone.previstoAc===undefined && clone.previsto!==undefined) clone.previstoAc=clone.previsto;
+    if(clone.realAc===undefined && clone.real!==undefined) clone.realAc=clone.real;
+    if(clone.tendenciaAc===undefined && clone.tendencia!==undefined) clone.tendenciaAc=clone.tendencia;
+    clone.previsto = clone.previstoAc;
+    clone.real = clone.realAc;
+    clone.tendencia = clone.tendenciaAc;
+    if(i<ultimoReal){ clone.tendenciaAc=null; clone.tendencia=null; clone.rsTendencia=null; }
+    else if(i===ultimoReal){ clone.tendenciaAc=Number(clone.realAc||0); clone.rsTendencia=Number(clone.rsReal||0); }
+    return clone;
+  });
+}
+
+function renderGraficoPerformanceFinanceira(o) {
+  let raw = curvaFinanceiraDaObra(o).slice().filter(x=>x&&x.data).sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')));
+  if(!raw.length) return `<div class="chart-empty">Aguardando dados da curva financeira</div>`;
+
+  const dados = normalizarCurvaFinanceiraDados(raw).map(d=>({
+    data:d.data,
+    previsto:cfPct(d.previstoAc),   // decimal → %
+    real:cfPct(d.realAc),           // decimal → %
+    tendencia:cfPct(d.tendenciaAc), // decimal → %
+    rsPrevisto:Number(d.rsPrevisto||0),
+    rsReal:Number(d.rsReal||0),
+    rsTendencia:Number(d.rsTendencia||0)
+  }));
+
+  const w=1100,h=480,padL=70,padR=80,padT=32,padB=72;
+  const plotW=w-padL-padR, plotH=h-padT-padB, baseY=padT+plotH;
+  const maxPct = 100;
+  const maxRS = Math.max(1,...dados.map(d=>Math.max(d.rsPrevisto,d.rsReal,d.rsTendencia||0)));
+  const xPos = i => padL+(dados.length===1?plotW/2:(i*(plotW/(dados.length-1))));
+  // Agora os valores já estão em % (0–100), yPct é linear direto
+  const yPct = v => v===null?null:padT+plotH-(Math.min(100,Math.max(0,Number(v)))/maxPct)*plotH;
+  const yRS = v => padT+plotH-(Number(v)/maxRS)*plotH;
+  const fmtM = v => (Number(v||0)/1e6).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' Mi';
+  const fmtP = v => v===null?'-':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
+
+  function path(campo, fn) {
+    let p='', ini=true;
+    dados.forEach((d,i)=>{ const v=d[campo]; if(v===null||v===undefined||isNaN(v)){ini=true;return;} const y=fn(v); if(y===null){ini=true;return;} p+=(ini?'M':'L')+xPos(i)+','+y+' '; ini=false; });
+    return p.trim();
+  }
+
+  const barW = Math.max(5,Math.min(14,plotW/(dados.length*4)));
+  const barras = dados.map((d,i)=>{
+    const x=xPos(i);
+    const hp=yRS(d.rsPrevisto), hr=yRS(d.rsReal), ht=d.rsTendencia?yRS(d.rsTendencia):null;
+    return `<rect class="pf-bar-prev" x="${x-barW-2}" y="${hp}" width="${barW}" height="${baseY-hp}" rx="2"><title>R$ Prev: ${moeda(d.rsPrevisto)}</title></rect>
+      <rect class="pf-bar-real" x="${x+2}" y="${hr}" width="${barW}" height="${baseY-hr}" rx="2"><title>R$ Real: ${moeda(d.rsReal)}</title></rect>
+      ${ht?`<rect x="${x+barW+4}" y="${ht}" width="${barW}" height="${baseY-ht}" fill="rgba(34,197,94,.35)" rx="2"><title>R$ Tend: ${moeda(d.rsTendencia)}</title></rect>`:''}`;
+  }).join('');
+
+  const pctGrid = [0,20,40,60,80,100].map(v=>`<line x1="${padL}" y1="${yPct(v)}" x2="${w-padR}" y2="${yPct(v)}" class="pf-grid"/><text x="${padL-10}" y="${yPct(v)+4}" text-anchor="end" class="pf-axis-label">${v}</text>`).join('');
+  const rsGrid = [0,.2,.4,.6,.8,1].map(f=>{ const v=maxRS*f; return `<text x="${w-padR+10}" y="${yRS(v)+4}" class="pf-axis-label">${fmtM(v)}</text>`; }).join('');
+  const labels = dados.map((d,i)=>{ const s=(d.data||'').slice(5)||d.data; return `<text x="${xPos(i)}" y="${h-28}" text-anchor="end" transform="rotate(-50 ${xPos(i)} ${h-28})" class="pf-axis-label">${s}</text>`; }).join('');
+
+  // Marco do último real — mesmo padrão da curva física
+  let ultimoRealIdx = -1;
+  for(let i=dados.length-1;i>=0;i--){ if(dados[i].real!==null&&dados[i].real!==undefined&&!isNaN(dados[i].real)&&dados[i].real>0){ultimoRealIdx=i;break;} }
+  const marcoUltimoReal = ultimoRealIdx >= 0 ? (()=>{
+    const d=dados[ultimoRealIdx], x=xPos(ultimoRealIdx), p=d.previsto, r=d.real;
+    const yR=yPct(r), yP=(p!==null&&!isNaN(p))?yPct(p):null;
+    const labelRealY=Math.max(padT+14,yR-14), labelPrevY=yP!==null?Math.max(padT+14,yP-14):null;
+    return `${yP!==null?`<circle cx="${x}" cy="${yP}" r="7" fill="#2563eb" stroke="#ffffff" stroke-width="3"><title>Último Prev: ${fmtP(p)}</title></circle>`:''}<circle cx="${x}" cy="${yR}" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="3"><title>Último Real: ${fmtP(r)}</title></circle>${yP!==null?`<text x="${x}" y="${labelPrevY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#2563eb">${fmtP(p)}</text>`:''}<text x="${x}" y="${labelRealY}" text-anchor="middle" class="pf-axis-label" style="font-weight:900;fill:#ef4444">${fmtP(r)}</text>`;
+  })() : '';
+
+  return `<div class="pf-chart-wrap">
+    <div class="pf-legend">
+      <span><i class="legend-dot previsto"></i>% Previsto Ac.</span>
+      <span><i class="legend-dot real"></i>% Real Ac.</span>
+      <span><i class="legend-dot tendencia"></i>% Tendência</span>
+      <span><i class="bar prev"></i>R$ Previsto</span>
+      <span><i class="bar real"></i>R$ Real</span>
+    </div>
+    <svg class="pf-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+      ${pctGrid}
+      <line x1="${padL}" y1="${baseY}" x2="${w-padR}" y2="${baseY}" class="pf-axis"/>
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${baseY}" class="pf-axis"/>
+      <line x1="${w-padR}" y1="${padT}" x2="${w-padR}" y2="${baseY}" class="pf-axis"/>
+      <text x="18" y="${padT+plotH/2}" transform="rotate(-90 18 ${padT+plotH/2})" class="pf-axis-title">% Ac.</text>
+      <text x="${w-18}" y="${padT+plotH/2}" transform="rotate(90 ${w-18} ${padT+plotH/2})" class="pf-axis-title">R$</text>
+      ${rsGrid}${barras}
+      <path d="${path('previsto',yPct)}" class="pf-line pf-previsto"/>
+      <path d="${path('real',yPct)}" class="pf-line pf-real"/>
+      <path d="${path('tendencia',yPct)}" class="pf-line pf-tendencia"/>
+      ${marcoUltimoReal}
+      ${labels}
+    </svg>
+  </div>`;
+}
+
+function renderPerformanceFinanceira(o) {
+  const c = resumoCurvaFinanceira(o);
+  const contrato = Number(o.contrato || 0);
+  const saldoContrato = contrato - c.realTotal;
+  return `<div class="performance-panel financial-performance">
+    <h2>PERFORMANCE FINANCEIRA</h2>
+    <div class="physical-cards">
+      <div class="physical-card" title="Soma total da coluna R$ Previsto na curva financeira"><span class="physical-label">R$ Contrato (Mi)</span><span class="physical-value" style="color:#334155">${mi(c.previstoTotal)}</span></div>
+      <div class="physical-card" title="Soma de R$ Previsto até a última linha com R$ Real informado"><span class="physical-label">R$ Previsto (Mi)</span><span class="physical-value" style="color:#2563eb">${mi(c.previstoAteReal)}</span></div>
+      <div class="physical-card" title="Soma total da coluna R$ Real"><span class="physical-label">R$ Real (Mi)</span><span class="physical-value" style="color:#16a34a">${mi(c.realTotal)}</span></div>
+      <div class="physical-card" title="R$ Contrato − R$ Real"><span class="physical-label">R$ Saldo (Mi)</span><span class="physical-value" style="color:${saldoContrato>=0?'#16a34a':'#dc2626'}">${mi(saldoContrato)}</span></div>
+    </div>
+    <div class="physical-chart">
+      <h3>CURVA DE AVANÇO FINANCEIRO</h3>
+      ${renderGraficoPerformanceFinanceira(o)}
+    </div>
+  </div>
+  ${renderAnaliseIA(o)}`;
+}
+
+/* ─── 14b. ANÁLISE DE INTELIGÊNCIA IA ─── */
+function coletarContextoObra(o) {
+  const crono    = resumoCronograma(o);
+  const fisica   = resumoCurvaFisica(o);
+  const fin      = resumoCurvaFinanceira(o);
+  const contrato = Number(o.contrato || 0);
+  const saldo    = contrato - fin.realTotal;
+  const durLB    = Number(crono.duracaoLB || 0);
+  const durPL    = Number(crono.duracao   || 0);
+  const desvDias = durLB && durPL ? durPL - durLB : null;
+  const hoje     = new Date();
+  hoje.setHours(0,0,0,0);
+
+  const todas = cronogramaDaObra(o) || [];
+  const normAv = a => { const v=Number(a.avancoFisico||0); return v>0&&v<=1 ? v*100 : v; };
+
+  // Nível da EAP — máximo nível 2 para contexto gerencial
+  const nivelEAP = a => {
+    const eap = String(a.eap||'').trim();
+    if(!eap || eap === '-' || eap === '0') return a.nivel || 1;
+    return eap.split('.').filter(p => p !== '').length;
+  };
+
+  // Atividades resumo até nível 2 (contexto gerencial)
+  const ate2 = todas.filter(a => nivelEAP(a) <= 3 && String(a.eap||'').trim() !== '-');
+
+  // Atividades folha para contagem
+  const folhas = todas.filter(a => !possuiFilhosCronograma(a, todas));
+  const atTotal = folhas.length;
+  const atConc  = folhas.filter(a => normAv(a) >= 100).length;
+  const atAnd   = folhas.filter(a => normAv(a) > 0 && normAv(a) < 100).length;
+  const atPend  = atTotal - atConc - atAnd;
+
+  // Atividades até nível 2 em atraso: término < hoje e avanço < 100%
+  const emAtraso = ate2.filter(a => {
+    if(normAv(a) >= 100) return false;
+    const term = a.termino ? new Date(a.termino + 'T00:00:00') : null;
+    return term && term < hoje;
+  }).sort((a,b) => new Date(a.termino) - new Date(b.termino));
+
+  // Atividades até nível 2 em andamento
+  const emAndamento = ate2.filter(a => normAv(a) > 0 && normAv(a) < 100)
+    .sort((a,b) => new Date(a.termino||'9999') - new Date(b.termino||'9999'));
+
+  // Próximas a iniciar nos 30 dias — até nível 2
+  const em30dias = new Date(hoje); em30dias.setDate(em30dias.getDate()+30);
+  const proximasIniciar = ate2.filter(a => {
+    if(normAv(a) > 0) return false;
+    const ini = a.inicio ? new Date(a.inicio + 'T00:00:00') : null;
+    return ini && ini >= hoje && ini <= em30dias;
+  }).sort((a,b) => new Date(a.inicio) - new Date(b.inicio));
+
+  // Formata lista — mostra descrição (sem EAP ID), datas e avanço
+  const fmtAt = (lista, max=15) => lista.slice(0,max).map(a => {
+    const av  = normAv(a).toFixed(0);
+    const ini = a.inicio  || a.inicioLB  || 'N/A';
+    const term = a.termino || a.terminoLB || 'N/A';
+    const dur  = a.duracao || a.duracaoLB || 'N/A';
+    const nivel = nivelEAP(a);
+    const indent = nivel === 2 ? '    ' : '  ';
+    return indent + '• ' + a.descricao + ' | Início: ' + ini + ' | Término: ' + term + ' | Dur: ' + dur + 'd | Avanço: ' + av + '%';
+  }).join('\n') || '  (nenhuma)';
+
+  return `
+=== PLANALYTICS — CONTEXTO DA OBRA PARA ANÁLISE IA ===
+Data de hoje: ${hoje.toISOString().slice(0,10)}
+
+OBRA: ${o.id} — ${o.descricao}
+Engenheiro: ${o.engenheiro}
+Localização: ${o.localizacao}
+Status: ${o.status}
+
+--- CRONOGRAMA GERAL ---
+Duração LB: ${crono.duracaoLB || 'N/A'} dias | Início LB: ${crono.inicioLB || 'N/A'} | Término LB: ${crono.terminoLB || 'N/A'}
+Duração PL: ${crono.duracao   || 'N/A'} dias | Início PL: ${crono.inicio   || 'N/A'} | Término PL: ${crono.termino  || 'N/A'}
+Desvio de prazo: ${desvDias !== null ? (desvDias >= 0 ? '+' : '') + desvDias + ' dias' : 'N/A'}
+Avanço físico global: ${(normAv({avancoFisico: crono.avancoFisico||0})).toFixed(1)}%
+
+--- RESUMO DE ATIVIDADES ---
+Total folha: ${atTotal} | Concluídas: ${atConc} | Em andamento: ${atAnd} | Pendentes: ${atPend}
+
+--- ⚠️ ATIVIDADES EM ATRASO (${emAtraso.length}) ---
+${fmtAt(emAtraso)}
+
+--- 🔄 ATIVIDADES EM ANDAMENTO (${emAndamento.length}) ---
+${fmtAt(emAndamento)}
+
+--- 📅 PRÓXIMAS A INICIAR — 30 DIAS (${proximasIniciar.length}) ---
+${fmtAt(proximasIniciar)}
+
+--- PERFORMANCE FÍSICA (Curva S) ---
+Avanço Previsto acumulado: ${fisica.previsto?.toFixed(2) ?? 'N/A'}%
+Avanço Real acumulado: ${fisica.real?.toFixed(2) ?? 'N/A'}%
+Desvio Físico: ${fisica.desvio?.toFixed(2) ?? 'N/A'}%
+
+--- PERFORMANCE FINANCEIRA ---
+R$ Contrato: ${moeda(contrato)}
+R$ Previsto até hoje: ${moeda(fin.previstoAteReal)}
+R$ Real executado: ${moeda(fin.realTotal)}
+R$ Saldo: ${moeda(saldo)}
+`.trim();
+}
+
+function renderAnaliseIA(o) {
+  return `<div class="ia-panel" id="ia-panel-${o.uid}">
+    <div class="ia-header">
+      <div>
+        <div class="ia-title">🤖 ANÁLISE DE INTELIGÊNCIA DA OBRA</div>
+        <div class="ia-subtitle">A IA lê todos os dados do banco e gera diagnóstico + planos de ação gerenciais</div>
+      </div>
+      <button class="ia-btn" onclick="gerarAnaliseIA('${o.uid}')" id="ia-btn-${o.uid}">
+        ✦ Gerar Análise com IA
+      </button>
+    </div>
+    <div class="ia-body" id="ia-body-${o.uid}">
+      <div class="ia-placeholder">Clique em <strong>Gerar Análise com IA</strong> para receber um diagnóstico completo com indicadores de risco, desvios e planos de ação para esta obra.</div>
+    </div>
+  </div>`;
+}
+
+// URL do servidor backend — altere para a URL da nuvem quando fizer deploy
+// Chave da API Groq — gratuita
+const GROQ_API_KEY = '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';
+
+async function gerarAnaliseIA(uid) {
+  const o = obras.find(x => x.uid === uid);
+  if(!o) return;
+  const btn  = $('ia-btn-'  + uid);
+  const body = $('ia-body-' + uid);
+  if(!btn || !body) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Analisando...';
+  body.innerHTML = '<div class="ia-loading"><span class="ia-spinner"></span> A IA está processando os dados da obra…</div>';
+
+  const contexto = coletarContextoObra(o);
+  const prompt = `Você é um especialista sênior em planejamento e controle de projetos industriais e de construção civil, com profundo conhecimento em cronogramas, caminho crítico, EVM e gestão de riscos. Analise os dados abaixo e forneça um relatório gerencial estruturado:
+
+1. **DIAGNÓSTICO GERAL** — Situação atual da obra em 3-4 frases objetivas. Inclua o desvio de prazo e físico de forma clara.
+
+2. **CAMINHO CRÍTICO E ATIVIDADES DE RISCO** — Com base nas atividades em atraso e em andamento, identifique quais representam maior risco ao prazo final. Aponte a EAP, descrição e impacto estimado em dias. Priorize as mais críticas.
+
+3. **ANÁLISE DE DESVIOS** — Desvios de prazo, físico e financeiro. Para cada desvio, informe: magnitude, causa provável e impacto no término da obra.
+
+4. **ATIVIDADES PRIORITÁRIAS — PRÓXIMOS 30 DIAS** — Liste as atividades que precisam de atenção imediata para não comprometer o cronograma. Seja específico sobre o que precisa ser feito.
+
+5. **PLANOS DE AÇÃO** — Para cada problema identificado, sugira ações concretas, priorizadas e com responsável sugerido (Engenheiro, Equipe, Cliente).
+
+6. **PREVISÃO DE TENDÊNCIA** — Se mantido o ritmo atual, qual será o término real estimado? A obra está no caminho de cumprir o prazo?
+
+Use linguagem gerencial, direta e objetiva. Seja específico com os dados fornecidos. Use markdown com cabeçalhos e listas.
+
+${contexto}`;
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_API_KEY
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if(!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `Erro ${res.status}`);
+    }
+
+    const data = await res.json();
+    const texto = data.choices?.[0]?.message?.content || '';
+    if(!texto) throw new Error('Resposta vazia da IA.');
+
+    body.innerHTML = `<div class="ia-result">${markdownParaHtml(texto)}</div>
+      <div class="ia-footer">Gerado em ${new Date().toLocaleString('pt-BR')} · Groq / LLaMA 3.3 70B · Tokens: ${data.usage?.completion_tokens || '—'}</div>`;
+  } catch(err) {
+    body.innerHTML = `<div class="ia-error">
+      ⚠️ Erro ao gerar análise: ${err.message}
+      <br><small style="opacity:.7;margin-top:.35rem;display:block">Tente novamente em alguns instantes.</small>
+    </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↺ Atualizar Análise';
+  }
+}
+
+function markdownParaHtml(md) {
+  return md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3}\s+(.+)$/gm,'<h4 class="ia-h4">$1</h4>')
+    .replace(/^[-•]\s+(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>(\n|$))+/g, s => `<ul>${s}</ul>`)
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/\n/g,'<br>')
+    .replace(/^(?!<[hul])(.+)$/gm, s => s.trim() ? s : '')
+    .trim();
+}
+
+/* ─── 14c. LIMPAR DADOS DOS BANCOS ─── */
+function limparCronograma(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid === uid);
+  if(!o) return;
+  if(!confirm('Deseja limpar TODOS os dados do cronograma desta obra? Esta ação não pode ser desfeita.')) return;
+  cronogramaDaObra(o).splice(0);
+  o.base.arquivos.cronograma.registros = 0;
+  salvarLocal();
+  renderCronogramaObra(o);
+  renderizarArvore();
+}
+
+function limparCurvaFisica(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid === uid);
+  if(!o) return;
+  if(!confirm('Deseja limpar TODOS os dados da Curva de Avanço Físico? Esta ação não pode ser desfeita.')) return;
+  curvaFisicaDaObra(o).splice(0);
+  salvarCurvaFisica(o);
+  renderCurvaFisicaObra(o);
+}
+
+function limparCurvaFinanceira(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid === uid);
+  if(!o) return;
+  if(!confirm('Deseja limpar TODOS os dados da Curva de Avanço Financeira? Esta ação não pode ser desfeita.')) return;
+  curvaFinanceiraDaObra(o).splice(0);
+  salvarCurvaFinanceira(o);
+  renderCurvaFinanceiraObra(o);
+}
+
+function adicionarLinhaCurvaFinanceira(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x=>x.uid===uid);
+  if(!o) return;
+  curvaFinanceiraDaObra(o).push({ data:'', previstoAc:'', realAc:'', tendenciaAc:'', rsPrevisto:'', rsReal:'', rsTendencia:'' });
+  salvarCurvaFinanceira(o);
+  renderCurvaFinanceiraObra(o);
+}
+
+function atualizarCurvaFinanceira(uid, i, campo, valor) {
+  if(!podeEditar()) return;
+  const o = obras.find(x=>x.uid===uid);
+  if(!o) return;
+  const dados = curvaFinanceiraDaObra(o);
+  if(!dados[i]) return;
+  dados[i][campo] = valor;
+  salvarCurvaFinanceira(o);
+}
+
+function excluirLinhaCurvaFinanceira(uid, i) {
+  if(!podeEditar()) return;
+  const o = obras.find(x=>x.uid===uid);
+  if(!o) return;
+  curvaFinanceiraDaObra(o).splice(i,1);
+  salvarCurvaFinanceira(o);
+  renderCurvaFinanceiraObra(o);
+}
+
+function renderCurvaFinanceiraObra(o) {
+  const dados = curvaFinanceiraDaObra(o);
+  const linhas = dados.map((r,i)=>`<tr>
+    <td><input type="date" value="${esc(r.data||'')}" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'data',this.value)"></td>
+    <td><input value="${esc(r.previstoAc??r.previsto??'')}" placeholder="%" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'previstoAc',this.value)"></td>
+    <td><input value="${esc(r.realAc??r.real??'')}" placeholder="%" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'realAc',this.value)"></td>
+    <td><input value="${esc(r.tendenciaAc??r.tendencia??'')}" placeholder="%" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'tendenciaAc',this.value)"></td>
+    <td><input value="${esc(r.rsPrevisto||'')}" placeholder="0" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'rsPrevisto',this.value)"></td>
+    <td><input value="${esc(r.rsReal||'')}" placeholder="0" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'rsReal',this.value)"></td>
+    <td><input value="${esc(r.rsTendencia||'')}" placeholder="0" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'rsTendencia',this.value)"></td>
+    <td><button class="delete-row-btn edit-only" onclick="excluirLinhaCurvaFinanceira('${o.uid}',${i})">Excluir</button></td>
+  </tr>`).join('');
+  $('content').innerHTML = `
+    <div class="obra-head">
+      <div><div class="welcome">${esc(o.id)} - ${esc(o.descricao)}</div><h1>CURVA DE AVANÇO FINANCEIRA</h1></div>
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+        <button class="back-btn" onclick="abrirBanco('${o.uid}')">Voltar</button>
+        <span class="badge">Banco Individual</span>
+      </div>
+    </div>
+    <div class="cronograma-panel">
+      <div class="cronograma-head">
+        <div><h2>CURVA DE AVANÇO FINANCEIRA</h2><p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada.</p></div>
+        <div class="cronograma-actions-right">
+          ${podeEditar()?`<button class="add-row-btn" class="edit-only-wrap" onclick="adicionarLinhaCurvaFinanceira('${o.uid}')">＋ Adicionar Linha</button><button class="add-row-btn import-btn" class="edit-only-wrap" onclick="selecionarImportacaoCurvaFinanceira('${o.uid}')">Importar Curva</button><button class="add-row-btn clear-btn" class="edit-only-wrap" onclick="limparCurvaFinanceira('${o.uid}')">🗑 Limpar Dados</button>`:''}<button class="add-row-btn default-btn" onclick="baixarModeloCurvaFinanceira()">Baixar Modelo Default</button>
+        </div>
+      </div>
+      <div class="cronograma-table-wrap">
+        <table class="cronograma-table">
+          <thead><tr><th>DATA</th><th>% Previsto Ac.</th><th>% Real Ac.</th><th>% Tendência</th><th>R$ Previsto</th><th>R$ Real</th><th>R$ Tendência</th><th>AÇÕES</th></tr></thead>
+          <tbody>${linhas||'<tr><td colspan="8" style="text-align:center;color:#64748b;padding:1rem">Nenhum dado cadastrado.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ─── 15. IMPORTAÇÃO/EXPORTAÇÃO XLSX ─── */
+function baixarModeloDefaultCronograma() {
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel não carregada.');return;}
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([['NÍVEL','EAP','DESCRIÇÃO','DURAÇÃO LB','INÍCIO LB','TÉRMINO LB','AV. FÍS %','DURAÇÃO PL','INÍCIO PL','TÉRMINO PL']]);
+  ws['!cols']=[{wch:8},{wch:14},{wch:42},{wch:12},{wch:14},{wch:14},{wch:12},{wch:12},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Cronograma');
+  XLSX.writeFile(wb, 'modelo_default_cronograma_planalytics.xlsx');
+}
+
+function selecionarImportacaoCronograma(uid) {
+  if(!podeEditar()) return;
+  const input = $('cronogramaImportInput');
+  if(input) { input.dataset.uid = uid; input.click(); }
+}
+
+function importarCronogramaExcel(event, uid) {
+  const file = event.target.files&&event.target.files[0];
+  if(!file) return;
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel não carregada.');event.target.value='';return;}
+  const obraUid = uid || event.target.dataset.uid;
+  const o = obras.find(x=>x.uid===obraUid);
+  if(!o){alert('Selecione uma obra antes de importar.');event.target.value='';return;}
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+      if(!rows.length){alert('Arquivo vazio.');return;}
+      const headers = rows[0].map(h=>String(h).trim().toUpperCase());
+      const idx = n => headers.indexOf(n.toUpperCase());
+      const obrig = ['EAP','DESCRIÇÃO','INÍCIO LB','TÉRMINO LB','AV. FÍS %','INÍCIO PL','TÉRMINO PL'];
+      const faltando = obrig.filter(c=>idx(c)===-1);
+      if(faltando.length){alert('Colunas faltando: '+faltando.join(', '));return;}
+      const atividades=[];
+      rows.slice(1).forEach((r,i)=>{
+        const eapRaw=String(r[idx('EAP')]||'').trim();
+        if(!eapRaw||eapRaw==='0') return;
+        const eap=eapRaw;
+        const inicioLB=normalizarDataExcel(r[idx('INÍCIO LB')]);
+        const terminoLB=normalizarDataExcel(r[idx('TÉRMINO LB')]);
+        const inicio=normalizarDataExcel(r[idx('INÍCIO PL')]);
+        const termino=normalizarDataExcel(r[idx('TÉRMINO PL')]);
+        let av=parseFloat(String(r[idx('AV. FÍS %')]||0).replace('%','').replace(',','.'));
+        if(!isNaN(av) && av > 0 && av <= 1) av = av * 100;
+        const item={nivel:calcularNivelPorEAP(eap),eap,descricao:String(r[idx('DESCRIÇÃO')]||'').trim(),duracaoLB:duracaoPorDatas(inicioLB,terminoLB)||'',inicioLB,terminoLB,avancoFisico:Math.max(0,Math.min(100,isNaN(av)?0:av)),duracao:duracaoPorDatas(inicio,termino)||'',inicio,termino};
+        atividades.push(item);
+      });
+      if(!atividades.length){alert('Nenhuma atividade encontrada.');return;}
+      recalcularResumosCronograma(atividades);
+      if(!confirm(`Importar ${atividades.length} atividade(s) para esta obra? Isso substituirá o cronograma atual.`)) return;
+      const dadosAtuais = cronogramaDaObra(o);
+      dadosAtuais.splice(0,dadosAtuais.length,...atividades);
+      ordenarCronograma(o);
+      renderCronogramaObra(o);
+      renderizarArvore();
+    }catch(err){console.error(err);alert('Erro ao importar: '+err.message);}
+    finally{event.target.value='';}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function baixarModeloDefaultCurvaFisica() {
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel não carregada.');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([['DATA','% Previsto','% Real','% Tendência','HH Previsto','HH Real']]);
+  ws['!cols']=[{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,'Curva Física');
+  XLSX.writeFile(wb,'modelo_default_curva_avanco_fisico_planalytics.xlsx');
+}
+
+function selecionarImportacaoCurvaFisica(uid) {
+  if(!podeEditar()) return;
+  const input = $('curvaFisicaImportInput');
+  if(input) { input.dataset.uid = uid; input.click(); }
+}
+
+function importarCurvaFisicaExcel(event, uid) {
+  const file = event.target.files&&event.target.files[0];
+  if(!file) return;
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel não carregada.');event.target.value='';return;}
+  const obraUid = uid || event.target.dataset.uid;
+  const o = obras.find(x=>x.uid===obraUid);
+  if(!o){alert('Obra não encontrada.');event.target.value='';return;}
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+      if(!rows.length){alert('Arquivo vazio.');return;}
+      const headers=rows[0].map(h=>String(h).trim().toUpperCase());
+      const idx=n=>headers.indexOf(n.toUpperCase());
+      const cols=['DATA','% PREVISTO','% REAL','% TENDÊNCIA','HH PREVISTO','HH REAL'];
+      const faltando=cols.filter(c=>idx(c)===-1);
+      if(faltando.length){alert('Colunas faltando: '+faltando.join(', '));return;}
+      const dados=[];
+      rows.slice(1).forEach(r=>{
+        if(r.every(v=>String(v||'').trim()==='')) return;
+        dados.push({
+          data:normalizarDataExcel(r[idx('DATA')]),
+          previsto:normalizarPercentualCurva(r[idx('% PREVISTO')],false,null),
+          real:normalizarPercentualCurva(r[idx('% REAL')],false,null),
+          tendencia:normalizarPercentualCurva(r[idx('% TENDÊNCIA')],false,null),
+          hhPrevisto:normalizarHHCurva(r[idx('HH PREVISTO')]),
+          hhReal:normalizarHHCurva(r[idx('HH REAL')])
+        });
+      });
+      curvaFisicaDaObra(o).splice(0,curvaFisicaDaObra(o).length,...dados.sort((a,b)=>String(a.data).localeCompare(String(b.data))));
+      salvarCurvaFisica(o);
+      renderCurvaFisicaObra(o);
+    }catch(err){console.error(err);alert('Erro ao importar: '+err.message);}
+    finally{event.target.value='';}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function baixarModeloCurvaFinanceira() {
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel não carregada.');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([['DATA','% Previsto Ac.','% Real Ac.','% Tendência','R$ Previsto','R$ Real','R$ Tendência']]);
+  ws['!cols']=[{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,'Curva Financeira');
+  XLSX.writeFile(wb,'Modelo_Default_Curva_Financeira_Planalytics.xlsx');
+}
+
+function selecionarImportacaoCurvaFinanceira(uid) {
+  if(!podeEditar()) return;
+  let inp = document.getElementById('curvaFinanceiraImportInput');
+  if(!inp){
+    inp = document.createElement('input');
+    inp.type='file'; inp.accept='.xlsx,.xls'; inp.id='curvaFinanceiraImportInput'; inp.style.display='none';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', ev => importarCurvaFinanceiraExcel(ev, inp.dataset.uid));
+  }
+  inp.dataset.uid = uid;
+  inp.value = '';
+  inp.click();
+}
+
+function cfExcelDate(v) {
+  if(typeof v==='number'){ const d=new Date(Math.round((v-25569)*86400*1000)); return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; }
+  if(v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}-${String(v.getDate()).padStart(2,'0')}`;
+  return normalizarDataExcel(v);
+}
+
+function importarCurvaFinanceiraExcel(event, uid) {
+  const file = event.target.files&&event.target.files[0];
+  if(!file) return;
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel não carregada.');return;}
+  const o = obras.find(x=>x.uid===uid);
+  if(!o){alert('Obra não encontrada.');return;}
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      const dados=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i];
+        if(!r||r.every(v=>String(v||'').trim()==='')) continue;
+        const pct=v=>{ const n=parseFloat(String(v||0).replace('%','').replace(',','.')); return isNaN(n)?0:n; };
+        dados.push({ data:cfExcelDate(r[0]), previstoAc:pct(r[1]), realAc:r[2]===''||r[2]===undefined?null:pct(r[2]), tendenciaAc:r[3]===''||r[3]===undefined?null:pct(r[3]), rsPrevisto:Number(r[4])||0, rsReal:Number(r[5])||0, rsTendencia:Number(r[6])||0 });
+      }
+      curvaFinanceiraDaObra(o).splice(0,curvaFinanceiraDaObra(o).length,...dados);
+      salvarCurvaFinanceira(o);
+      renderCurvaFinanceiraObra(o);
+      alert('Curva Financeira importada com sucesso! '+dados.length+' registros.');
+    }catch(err){console.error(err);alert('Erro ao importar: '+err.message);}
+    finally{event.target.value='';}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ─── 16. BACKUP JSON ─── */
+function exportarBackupPlanalytics() {
+  if(!podeEditar()) return;
+  try{
+    const payload={ app:'PLANALYTICS', versao:'backup-localstorage-v1', storageKey:STORAGE_KEY, exportadoEm:new Date().toISOString(), obras:obras||[] };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=`backup_planalytics_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }catch(err){console.error(err);alert('Erro ao exportar backup.');}
+}
+
+function selecionarImportacaoBackupPlanalytics() { if(!podeEditar()) return; $('backupImportInput').click(); }
+
+function importarBackupPlanalytics(event) {
+  const file = event.target.files&&event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try{
+      const json=JSON.parse(e.target.result);
+      const lista=Array.isArray(json)?json:json.obras;
+      if(!Array.isArray(lista)){alert('Backup inválido.');return;}
+      if(!confirm(`Importar backup com ${lista.length} obra(s)? Isso substituirá os dados atuais.`)) return;
+      obras=lista.map(normalizar);
+      salvarLocal();
+      abrirPortfolio();
+      renderizarArvore();
+      // Salva todas as obras no Supabase
+      if(usuarioAtual) {
+        alert('Salvando obras na nuvem, aguarde...');
+        await salvarTodasObrasSupabase();
+        alert('Backup importado e salvo na nuvem com sucesso!');
+      } else {
+        alert('Backup importado com sucesso!');
+      }
+    }catch(err){console.error(err);alert('Erro ao importar backup.');}
+    finally{event.target.value='';}
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+/* ─── 16B. AUTENTICAÇÃO E PERFIS ─── */
+
+async function salvarNovaSenha() {
+  const nova    = $('paNovaSenha').value;
+  const confirma = $('paConfirmarSenha').value;
+  const errEl   = $('paError');
+  errEl.style.display = 'none';
+
+  if(!nova || nova.length < 6) {
+    errEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(nova !== confirma) {
+    errEl.textContent = 'As senhas não coincidem.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  $('paLoading').style.display = 'block';
+  const { error } = await sb.auth.updateUser({ password: nova });
+  if(error) {
+    errEl.textContent = 'Erro ao salvar senha: ' + error.message;
+    errEl.style.display = 'block';
+    $('paLoading').style.display = 'none';
+    return;
+  }
+
+  // Marca primeiro acesso como realizado
+  await sb.rpc('marcar_acesso_realizado', { p_auth_id: usuarioAtual.id });
+  usuarioAtual.primeiro_acesso = false;
+
+  $('primeiroAcessoOverlay').classList.remove('ativo');
+  $('paLoading').style.display = 'none';
+  $('paNovaSenha').value = '';
+  $('paConfirmarSenha').value = '';
+}
+
+async function esqueceuSenha() {
+  const email = $('loginEmail').value.trim();
+  const errEl = $('loginError');
+  const sucEl = $('loginSuccess');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if(!email) {
+    errEl.textContent = 'Digite seu e-mail acima para receber o link de redefinição.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+
+  if(error) {
+    errEl.textContent = 'Erro ao enviar e-mail: ' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  sucEl.textContent = '✓ E-mail de redefinição enviado para ' + email + '. Verifique sua caixa de entrada.';
+  sucEl.style.display = 'block';
+}
+
+async function fazerLogin() {
+  const email = $('loginEmail').value.trim();
+  const senha = $('loginSenha').value;
+  const errEl = $('loginError');
+  const btn   = $('loginBtn');
+  const load  = $('loginLoading');
+
+  errEl.style.display = 'none';
+  if(!email || !senha) { errEl.textContent = 'Preencha e-mail e senha.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  load.style.display = 'block';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+
+  if(error || !data.user) {
+    errEl.textContent = 'E-mail ou senha incorretos.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    load.style.display = 'none';
+    return;
+  }
+
+  await iniciarSessao(data.user);
+}
+
+async function iniciarSessao(user) {
+  // Busca perfil via função security definer (ignora RLS — funciona com file://)
+  const { data: perfilArr, error } = await sb.rpc('get_meu_perfil');
+  const perfil = perfilArr && perfilArr.length ? perfilArr[0] : null;
+
+  if(error || !perfil) {
+    await sb.auth.signOut();
+    const errEl = $('loginError');
+    errEl.textContent = 'Usuário sem perfil configurado. Contate o administrador.';
+    errEl.style.display = 'block';
+    $('loginBtn').disabled = false;
+    $('loginLoading').style.display = 'none';
+    return;
+  }
+
+  usuarioAtual = { id: user.id, email: user.email, ...perfil };
+
+  // Atualiza topbar
+  $('topUserName').textContent = perfil.nome || user.email;
+  const perfilEl = $('topUserPerfil');
+  perfilEl.textContent = perfil.perfil;
+  perfilEl.className = 'user-perfil perfil-' + perfil.perfil.toLowerCase();
+
+  // Define empresa inicial
+  empresaAtualId = perfil.empresa_id;
+
+  // Bloqueia botões de edição para Visualizador
+  const soLeitura = perfil.perfil === 'Visualizador';
+  document.body.classList.toggle('visualizador', soLeitura);
+  const btnNova = document.querySelector('.top-btn.primary');
+  if(btnNova) btnNova.style.display = soLeitura ? 'none' : '';
+  document.querySelectorAll('.top-btn.settings').forEach(btn => {
+    if(btn.textContent.includes('Backup') || btn.textContent.includes('Configurações')) {
+      btn.style.display = soLeitura ? 'none' : '';
+    }
+  });
+
+  // Carrega seletor de empresas para CEO
+  await carregarSeletorEmpresas();
+  // Mostra botão do Painel CEO
+  document.querySelectorAll('.ceo-only').forEach(el => el.style.display = perfil.perfil === 'CEO' ? '' : 'none');
+
+  // Oculta login e mostra app
+  $('loginOverlay').style.display = 'none';
+
+  // Verifica primeiro acesso
+  if(perfil.primeiro_acesso) {
+    $('primeiroAcessoOverlay').classList.add('ativo');
+    return;
+  }
+
+  // Carrega obras do Supabase
+  obras = await carregarObrasSupabase();
+  if(!obras.length) obras = carregarObras(); // fallback localStorage
+  salvarLocal();
+  renderizar();
+}
+
+async function fazerLogout() {
+  await sb.auth.signOut();
+  usuarioAtual = null;
+  empresaAtualId = null;
+  obras = [];
+  document.body.classList.remove('perfil-ceo', 'visualizador');
+  $('loginOverlay').style.display = 'flex';
+  $('loginEmail').value = '';
+  $('loginSenha').value = '';
+  $('loginBtn').disabled = false;
+  $('loginLoading').style.display = 'none';
+  $('loginError').style.display = 'none';
+  $('topUserName').textContent = '—';
+  $('topUserPerfil').textContent = '';
+}
+
+function podeEditar() { return usuarioAtual && (usuarioAtual.perfil === 'CEO' || usuarioAtual.perfil === 'ADM'); }
+
+/* ─── SELETOR DE EMPRESAS (CEO) ─── */
+async function carregarSeletorEmpresas() {
+  console.log('[CEO] perfil:', usuarioAtual?.perfil);
+  if(!usuarioAtual || usuarioAtual.perfil !== 'CEO') {
+    console.log('[CEO] não é CEO, abortando seletor');
+    return;
+  }
+  const { data, error } = await sb.rpc('get_todas_empresas');
+  console.log('[CEO] empresas:', JSON.stringify({data, error}));
+  if(error || !data) {
+    console.error('[CEO] erro ao carregar empresas:', error);
+    return;
+  }
+  const sel = $('empresaSelect');
+  if(!sel) { console.error('[CEO] elemento empresaSelect não encontrado'); return; }
+  sel.innerHTML = data.map(e =>
+    `<option value="${e.id}" ${e.id === empresaAtualId ? 'selected' : ''}>${e.nome}</option>`
+  ).join('');
+  document.body.classList.add('perfil-ceo');
+  console.log('[CEO] seletor carregado com', data.length, 'empresa(s)');
+}
+
+async function trocarEmpresa(empresaId) {
+  if(!empresaId) return;
+  empresaAtualId = empresaId;
+  // Recarrega obras da empresa selecionada
+  obras = await carregarObrasSupabase();
+  salvarLocal();
+  abrirPortfolio();
+  renderizarArvore();
+}
+
+/* ─── 16C. PAINEL CEO ─── */
+
+let _todasEmpresas = [];
+let _todosUsuarios = [];
+
+function abrirPainelCEO() {
+  telaAtual = 'ceo';
+  obraAtualId = null;
+  arquivoAtual = null;
+  renderizarArvore();
+  renderPainelCEO();
+}
+
+function fecharPainelCEO() { abrirPortfolio(); }
+
+function renderPainelCEO() {
+  $('content').innerHTML = `
+    <div class="ceo-panel">
+      <h2>⚙️ Painel de Administração</h2>
+      <div class="ceo-section">
+        <h3>Empresas cadastradas <button class="ceo-btn primary" onclick="mostrarFormEmpresaInline()">+ Nova Empresa</button></h3>
+        <div id="formNovaEmpresa" style="display:none;margin-bottom:1rem;background:#f8fafc;padding:1rem;border-radius:.5rem;border:1px solid #e2e8f0">
+          <div class="ceo-form-row">
+            <div class="ceo-form-group">
+              <label>Nome da Empresa</label>
+              <input type="text" id="inputNomeEmpresa" placeholder="Ex: Cavalcante Peixoto Engenharia">
+            </div>
+          </div>
+          <div class="ceo-actions">
+            <button class="ceo-btn" onclick="$('formNovaEmpresa').style.display='none'">Cancelar</button>
+            <button class="ceo-btn primary" onclick="cadastrarEmpresa()">Salvar Empresa</button>
+          </div>
+        </div>
+        <table class="ceo-table">
+          <thead><tr><th>Nome</th><th>Ações</th></tr></thead>
+          <tbody id="tbodyEmpresas"><tr><td colspan="2" style="text-align:center;color:#94a3b8">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="ceo-section">
+        <h3>Usuários cadastrados <button class="ceo-btn primary" onclick="mostrarFormUsuarioInline()">+ Novo Usuário</button></h3>
+        <div id="formNovoUsuario" style="display:none;margin-bottom:1rem;background:#f8fafc;padding:1rem;border-radius:.5rem;border:1px solid #e2e8f0">
+          <p style="font-size:.8rem;color:#64748b;margin-bottom:.75rem">
+            ① Crie o login do usuário em <strong>Supabase → Authentication → Users → Add user</strong> e copie o UID gerado.<br>
+            ② Preencha os campos abaixo para vincular o perfil no Planalytics.
+          </p>
+          <div class="ceo-form-row">
+            <div class="ceo-form-group"><label>UID do usuário (copiado do Supabase)</label><input type="text" id="inputUidUsuario" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+            <div class="ceo-form-group"><label>Nome</label><input type="text" id="inputNomeUsuario" placeholder="Nome completo"></div>
+          </div>
+          <div class="ceo-form-row">
+            <div class="ceo-form-group"><label>Empresa</label><select id="selectEmpresaUsuario"></select></div>
+            <div class="ceo-form-group"><label>Perfil</label><select id="selectPerfilUsuario"><option value="ADM">ADM</option><option value="Visualizador">Visualizador</option></select></div>
+          </div>
+          <div class="ceo-actions">
+            <button class="ceo-btn" onclick="$('formNovoUsuario').style.display='none'">Cancelar</button>
+            <button class="ceo-btn primary" onclick="vincularUsuario()">Vincular Perfil</button>
+          </div>
+        </div>
+        <table class="ceo-table">
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Empresa</th><th>Perfil</th><th>Ações</th></tr></thead>
+          <tbody id="tbodyUsuarios"><tr><td colspan="4" style="text-align:center;color:#94a3b8">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>`;
+  carregarDadosPainelCEO();
+}
+
+async function carregarDadosPainelCEO() {
+  const { data: empresas } = await sb.rpc('get_todas_empresas');
+  _todasEmpresas = empresas || [];
+  const { data: usuarios } = await sb.rpc('get_todos_usuarios');
+  _todosUsuarios = usuarios || [];
+  renderTabelaEmpresas(_todasEmpresas);
+  renderTabelaUsuarios(_todosUsuarios);
+  const sel = $('selectEmpresaUsuario');
+  if(sel) sel.innerHTML = _todasEmpresas.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+}
+
+function renderTabelaEmpresas(lista) {
+  const tbody = $('tbodyEmpresas');
+  if(!tbody) return;
+  if(!lista.length) { tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8">Nenhuma empresa cadastrada.</td></tr>'; return; }
+  tbody.innerHTML = lista.map(e => `<tr>
+    <td><strong>${esc(e.nome)}</strong></td>
+    <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+      <button class="ceo-btn sm" onclick="selecionarEmpresaNoApp('${e.id}')">Visualizar</button>
+      <button class="ceo-btn sm" style="background:#e0f2fe;color:#0369a1" onclick="editarEmpresa('${e.id}','${esc(e.nome)}')">Editar</button>
+      <button class="ceo-btn sm danger" onclick="excluirEmpresa('${e.id}','${esc(e.nome)}')">Excluir</button>
+    </td>
+  </tr>`).join('');
+}
+
+function renderTabelaUsuarios(lista) {
+  const tbody = $('tbodyUsuarios');
+  if(!tbody) return;
+  if(!lista.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8">Nenhum usuário cadastrado.</td></tr>'; return; }
+  tbody.innerHTML = lista.map(u => {
+    const emp = _todasEmpresas.find(e => e.id === u.empresa_id);
+    const pc = u.perfil === 'CEO' ? 'ceo' : u.perfil === 'ADM' ? 'adm' : 'viz';
+    return `<tr>
+      <td><strong>${esc(u.nome)}</strong></td>
+      <td>${esc(u.email||'—')}</td>
+      <td>${emp ? esc(emp.nome) : '—'}</td>
+      <td><span class="ceo-badge ${pc}">${u.perfil}</span></td>
+      <td style="display:flex;gap:.4rem">
+        <button class="ceo-btn sm" style="background:#e0f2fe;color:#0369a1" onclick="editarUsuario('${u.auth_id}','${esc(u.nome)}','${u.empresa_id||''}','${u.perfil}')">Editar</button>
+        ${u.perfil !== 'CEO' ? `<button class="ceo-btn sm danger" onclick="excluirUsuario('${u.auth_id}','${esc(u.nome)}')">Excluir</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function mostrarFormEmpresaInline() { $('formNovaEmpresa').style.display='block'; $('inputNomeEmpresa').focus(); }
+
+async function editarEmpresa(id, nomeAtual) {
+  const novoNome = prompt('Novo nome da empresa:', nomeAtual);
+  if(!novoNome || novoNome.trim() === nomeAtual) return;
+  const { error } = await sb.rpc('editar_empresa', { p_id: id, p_nome: novoNome.trim() });
+  if(error) { alert('Erro: ' + error.message); return; }
+  await carregarDadosPainelCEO();
+  await carregarSeletorEmpresas();
+}
+
+async function excluirEmpresa(id, nome) {
+  if(!confirm('Excluir a empresa "' + nome + '"? Todas as obras vinculadas também serão excluídas.')) return;
+  const { error } = await sb.rpc('excluir_empresa', { p_id: id });
+  if(error) { alert('Erro: ' + error.message); return; }
+  await carregarDadosPainelCEO();
+  await carregarSeletorEmpresas();
+}
+
+async function editarUsuario(authId, nomeAtual, empresaIdAtual, perfilAtual) {
+  const empOptions = _todasEmpresas.map(e => e.nome).join(' / ');
+  const novoNome = prompt('Nome do usuário:', nomeAtual);
+  if(!novoNome) return;
+  const novoPerfil = prompt('Perfil (ADM / Visualizador):', perfilAtual);
+  if(!novoPerfil || !['ADM','Visualizador','CEO'].includes(novoPerfil)) { alert('Perfil inválido.'); return; }
+  const empAtualNome = _todasEmpresas.find(e => e.id === empresaIdAtual)?.nome || _todasEmpresas[0]?.nome || '';
+  const nomeEmp = prompt('Empresa (' + empOptions + '):', empAtualNome);
+  const emp = _todasEmpresas.find(e => e.nome.toLowerCase() === (nomeEmp||'').toLowerCase());
+  if(!emp) { alert('Empresa não encontrada. Verifique o nome digitado.'); return; }
+  const { error } = await sb.rpc('editar_usuario', { p_auth_id: authId, p_nome: novoNome.trim(), p_empresa_id: emp.id, p_perfil: novoPerfil });
+  if(error) { alert('Erro: ' + error.message); return; }
+  await carregarDadosPainelCEO();
+}
+
+async function excluirUsuario(authId, nome) {
+  if(!confirm('Excluir o usuário "' + nome + '"? Ele perderá o acesso ao sistema.')) return;
+  const { error } = await sb.rpc('excluir_usuario', { p_auth_id: authId });
+  if(error) { alert('Erro: ' + error.message); return; }
+  await carregarDadosPainelCEO();
+}
+function mostrarFormUsuarioInline() { $('formNovoUsuario').style.display='block'; $('inputNomeUsuario').focus(); }
+
+async function cadastrarEmpresa() {
+  const nome = $('inputNomeEmpresa').value.trim();
+  if(!nome) { alert('Informe o nome da empresa.'); return; }
+  const { error } = await sb.rpc('criar_empresa', { p_nome: nome });
+  if(error) { alert('Erro: ' + error.message); return; }
+  alert('Empresa cadastrada com sucesso!');
+  ocultarFormEmpresa();
+  await carregarDadosPainelCEO();
+  await carregarSeletorEmpresas();
+}
+
+async function vincularUsuario() {
+  const uid    = $('inputUidUsuario').value.trim();
+  const nome   = $('inputNomeUsuario').value.trim();
+  const empId  = $('selectEmpresaUsuario').value;
+  const perfil = $('selectPerfilUsuario').value;
+
+  if(!uid || !nome) { alert('Preencha o UID e o nome do usuário.'); return; }
+  if(!/^[0-9a-f-]{36}$/.test(uid)) { alert('UID inválido. Copie exatamente do Supabase.'); return; }
+
+  const { error } = await sb.rpc('vincular_perfil_usuario', {
+    p_auth_id: uid,
+    p_nome: nome,
+    p_empresa_id: empId,
+    p_perfil: perfil
+  });
+
+  if(error) {
+    if(error.message.includes('violates foreign key')) {
+      alert('UID não encontrado no Supabase. Verifique se o usuário foi criado em Authentication → Users.');
+    } else {
+      alert('Erro: ' + error.message);
+    }
+    return;
+  }
+
+  alert('Perfil vinculado com sucesso! O usuário já pode fazer login.');
+  $('formNovoUsuario').style.display = 'none';
+  $('inputUidUsuario').value = '';
+  $('inputNomeUsuario').value = '';
+  await carregarDadosPainelCEO();
+}
+
+function selecionarEmpresaNoApp(empresaId) {
+  $('empresaSelect').value = empresaId;
+  trocarEmpresa(empresaId);
+  fecharPainelCEO();
+}
+
+/* ─── 17. INICIALIZAÇÃO ─── */
+window.addEventListener('DOMContentLoaded', async () => {
+  // Fechar modal ao clicar no fundo
+  $('modalBg').addEventListener('click', e => { if(e.target === $('modalBg')) fecharModal(); });
+
+  // Verifica se já tem sessão ativa (recarregou a página)
+  const { data: { session } } = await sb.auth.getSession();
+  if(session && session.user) {
+    await iniciarSessao(session.user);
+  } else {
+    // Sem sessão — mostra login, renderiza estrutura vazia
+    obras = carregarObras();
+    renderizar();
+  }
+});
+</script>
+</body>
+</html>
