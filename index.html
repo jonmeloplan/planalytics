@@ -2580,25 +2580,38 @@ function importarBackupPlanalytics(event) {
 /* ─── 16B. AUTENTICAÇÃO E PERFIS ─── */
 
 async function verificarRedefinicaoSenha() {
-  // Verifica se a URL tem código de redefinição de senha
-  const hash = window.location.hash;
-  const params = new URLSearchParams(hash.replace('#', '?'));
-  const type = params.get('type');
-  const accessToken = params.get('access_token');
+  // Formato novo: ?code=xxx (PKCE flow)
+  const searchParams = new URLSearchParams(window.location.search);
+  const code = searchParams.get('code');
 
-  if(type === 'recovery' && accessToken) {
-    // Define a sessão com o token recebido
-    const { error } = await sb.auth.setSession({
-      access_token: accessToken,
-      refresh_token: params.get('refresh_token') || ''
-    });
+  if(code) {
+    const { error } = await sb.auth.exchangeCodeForSession(code);
     if(!error) {
       $('resetOverlay').classList.add('ativo');
-      // Limpa a URL para não expor o token
       history.replaceState(null, '', window.location.pathname);
       return true;
     }
   }
+
+  // Formato antigo: #access_token=xxx&type=recovery
+  const hash = window.location.hash;
+  if(hash) {
+    const params = new URLSearchParams(hash.replace('#', ''));
+    const type = params.get('type');
+    const accessToken = params.get('access_token');
+    if(type === 'recovery' && accessToken) {
+      const { error } = await sb.auth.setSession({
+        access_token: accessToken,
+        refresh_token: params.get('refresh_token') || ''
+      });
+      if(!error) {
+        $('resetOverlay').classList.add('ativo');
+        history.replaceState(null, '', window.location.pathname);
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
