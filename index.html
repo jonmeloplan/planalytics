@@ -2792,6 +2792,8 @@ async function iniciarSessao(user) {
   obras = await carregarObrasSupabase();
   if(!obras.length) obras = carregarObras(); // fallback localStorage
   salvarLocal();
+  // Garante que não-CEO nunca fica na tela do painel CEO
+  if(telaAtual === 'ceo' && perfil.perfil !== 'CEO') telaAtual = 'portfolio';
   renderizar();
 }
 
@@ -2851,6 +2853,7 @@ let _todasEmpresas = [];
 let _todosUsuarios = [];
 
 function abrirPainelCEO() {
+  if(!usuarioAtual || usuarioAtual.perfil !== 'CEO') return;
   telaAtual = 'ceo';
   obraAtualId = null;
   arquivoAtual = null;
@@ -2861,6 +2864,7 @@ function abrirPainelCEO() {
 function fecharPainelCEO() { abrirPortfolio(); }
 
 function renderPainelCEO() {
+  if(!usuarioAtual || usuarioAtual.perfil !== 'CEO') { abrirPortfolio(); return; }
   $('content').innerHTML = `
     <div class="ceo-panel">
       <h2>⚙️ Painel de Administração</h2>
