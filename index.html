@@ -687,7 +687,7 @@
       <div class="field"><label>Descrição</label><input id="obraDescricao" required placeholder="Ex: Shopping Center"></div>
       <div class="field"><label>Engenheiro Responsável</label><input id="obraEngenheiro" required></div>
       <div class="field"><label>Localização da Obra</label><input id="obraLocalizacao" required placeholder="Ex: Maceió/AL, Unidade X, Área Y"></div>
-      <div class="field"><label>R$ Contrato</label><input id="obraContrato" type="number" min="0" step="0.01" required placeholder="Ex: 1500000"></div>
+
       <div class="field"><label>Status</label>
         <select id="obraStatus" required>
           <option>Em andamento</option>
@@ -1011,7 +1011,7 @@ function abrirModal(i=null) {
   $('obraDescricao').value = o?.descricao || '';
   $('obraEngenheiro').value = o?.engenheiro || '';
   $('obraLocalizacao').value = o?.localizacao || '';
-  $('obraContrato').value = o?.contrato || '';
+
   $('obraStatus').value = o?.status || 'Em andamento';
   $('obraInicio').value = o?.inicio || '';
   $('obraTermino').value = o?.termino || '';
@@ -1032,7 +1032,7 @@ function salvarObra(e) {
     descricao: $('obraDescricao').value.trim(),
     engenheiro: $('obraEngenheiro').value.trim(),
     localizacao: $('obraLocalizacao').value.trim(),
-    contrato: Number($('obraContrato').value || 0),
+    contrato: 0,
     status: $('obraStatus').value,
     inicio: $('obraInicio').value,
     termino: $('obraTermino').value
@@ -2044,10 +2044,10 @@ function renderPerformanceFinanceira(o) {
   return `<div class="performance-panel financial-performance">
     <h2>PERFORMANCE FINANCEIRA</h2>
     <div class="physical-cards">
-      <div class="physical-card" title="Soma total da coluna R$ Previsto na curva financeira"><span class="physical-label">R$ Contrato (Mi)</span><span class="physical-value" style="color:#334155">${mi(c.previstoTotal)}</span></div>
+      <div class="physical-card" title="Soma total da coluna R$ Previsto da curva financeira"><span class="physical-label">R$ Contrato (Mi)</span><span class="physical-value" style="color:#334155">${mi(c.previstoTotal)}</span></div>
       <div class="physical-card" title="Soma de R$ Previsto até a última linha com R$ Real informado"><span class="physical-label">R$ Previsto (Mi)</span><span class="physical-value" style="color:#2563eb">${mi(c.previstoAteReal)}</span></div>
       <div class="physical-card" title="Soma total da coluna R$ Real"><span class="physical-label">R$ Real (Mi)</span><span class="physical-value" style="color:#16a34a">${mi(c.realTotal)}</span></div>
-      <div class="physical-card" title="R$ Contrato − R$ Real"><span class="physical-label">R$ Saldo (Mi)</span><span class="physical-value" style="color:${saldoContrato>=0?'#16a34a':'#dc2626'}">${mi(saldoContrato)}</span></div>
+      <div class="physical-card" title="R$ Contrato (Previsto Total) − R$ Real"><span class="physical-label">R$ Saldo (Mi)</span><span class="physical-value" style="color:${(c.previstoTotal-c.realTotal)>=0?'#16a34a':'#dc2626'}">${mi(c.previstoTotal-c.realTotal)}</span></div>
     </div>
     <div class="physical-chart">
       <h3>CURVA DE AVANÇO FINANCEIRO</h3>
