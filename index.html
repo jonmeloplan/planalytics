@@ -1459,7 +1459,7 @@ function excluirLinhaCronograma(uid, idx) {
 function renderGanttCronograma(atividades) {
   const monthWidth = 65;
   const valid = d => d && !isNaN(new Date(d+'T00:00:00'));
-  const normAv = v => { let n=Number(String(v||0).replace('%','').replace(',','.')); if(isNaN(n))n=0; if(n>0&&n<=1)n*=100; return Math.max(0,Math.min(100,+n.toFixed(2))); };
+  const normAv = v => { let n=Number(String(v||0).replace('%','').replace(',','.')); if(isNaN(n))n=0; return Math.max(0,Math.min(100,+n.toFixed(2))); };
   const fmtPct = v => { const n=normAv(v); return `${Number.isInteger(n)?n.toFixed(0):n.toFixed(2)}%`; };
 
   const datas = [];
@@ -1597,7 +1597,7 @@ function renderTimelineExecutiva(o) {
   const posPx = d => valid(d) ? Math.max(0,((new Date(d+'T00:00:00')-min)/(1000*60*60*24))*pxPorDia) : 0;
   const widPx = (i,f) => { if(!valid(i)||!valid(f)) return 0; const ini=new Date(i+'T00:00:00'),fim=new Date(f+'T00:00:00'); return Math.max(8,(((fim-ini)/(1000*60*60*24)+1)*pxPorDia)); };
 
-  const normAv = v => { if(v===null||v===undefined||v==='') return 0; let n=Number(String(v).replace('%','').replace(',','.')); if(isNaN(n))n=0; if(n>0&&n<=1)n*=100; return Math.max(0,Math.min(100,+n.toFixed(2))); };
+  const normAv = v => { if(v===null||v===undefined||v==='') return 0; let n=Number(String(v).replace('%','').replace(',','.')); if(isNaN(n))n=0; return Math.max(0,Math.min(100,+n.toFixed(2))); };
   const fmtPct = v => { const n=normAv(v); return `${Number.isInteger(n)?n.toFixed(0):n.toFixed(2)}%`; };
 
   const mesesHtml = mesesLista.map((m,idx)=>`<span class="timeline-exec-month" style="left:${idx*monthWidth}px">${meses[m.getMonth()]}/${m.getFullYear()}</span>`).join('');
@@ -1635,8 +1635,7 @@ function renderResumoAtividadesCronograma(o) {
   const possuiFilhos = item => { const eapPai=String(item.eap||'').trim(); if(!eapPai||eapPai==='0') return true; return dados.some(f=>String(f.eap||'').trim().startsWith(eapPai+'.')); };
   const atividades = dados.filter(a => { const eap=String(a.eap||'').trim(); return eap && eap!=='0' && !possuiFilhos(a); });
   const total = atividades.length;
-  // Normaliza avancoFisico: aceita tanto formato decimal (0-1) quanto percentual (0-100)
-  const normAv = a => { const v=Number(a.avancoFisico||0); return v>0&&v<=1 ? v*100 : v; };
+  const normAv = a => Number(a.avancoFisico||0);
   const concluidas = atividades.filter(a=>normAv(a)>=100).length;
   const andamento = atividades.filter(a=>normAv(a)>0&&normAv(a)<100).length;
   const pendentes = atividades.filter(a=>normAv(a)<=0).length;
@@ -2072,7 +2071,7 @@ function coletarContextoObra(o) {
   hoje.setHours(0,0,0,0);
 
   const todas = cronogramaDaObra(o) || [];
-  const normAv = a => { const v=Number(a.avancoFisico||0); return v>0&&v<=1 ? v*100 : v; };
+  const normAv = a => Number(a.avancoFisico||0);
 
   // Nível da EAP — máximo nível 2 para contexto gerencial
   const nivelEAP = a => {
@@ -2180,7 +2179,7 @@ function renderAnaliseIA(o) {
 
 // URL do servidor backend — altere para a URL da nuvem quando fizer deploy
 // Chave da API Groq — gratuita
-const GROQ_API_KEY = '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';
+const IA_SERVER_URL = 'http://localhost:3000/api/ia';
 
 async function gerarAnaliseIA(uid) {
   const o = obras.find(x => x.uid === uid);
@@ -2241,34 +2240,32 @@ Use linguagem gerencial, objetiva e técnica. Evite generalidades — seja espec
 ${contexto}`;
 
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch(IA_SERVER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + GROQ_API_KEY
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, max_tokens: 1500 })
     });
 
     if(!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Erro ${res.status}`);
+      throw new Error(err.error || `Servidor retornou status ${res.status}`);
     }
 
     const data = await res.json();
-    const texto = data.choices?.[0]?.message?.content || '';
-    if(!texto) throw new Error('Resposta vazia da IA.');
+    const texto = data.texto || '';
+    if(!texto) throw new Error('Resposta vazia do servidor.');
 
     body.innerHTML = `<div class="ia-result">${markdownParaHtml(texto)}</div>
       <div class="ia-footer">Gerado em ${new Date().toLocaleString('pt-BR')} · Groq / LLaMA 3.3 70B · Tokens: ${data.usage?.completion_tokens || '—'}</div>`;
   } catch(err) {
+    const isConexao = err.message.includes('fetch') || err.message.includes('Failed') || err.message.includes('NetworkError');
     body.innerHTML = `<div class="ia-error">
-      ⚠️ Erro ao gerar análise: ${err.message}
-      <br><small style="opacity:.7;margin-top:.35rem;display:block">Tente novamente em alguns instantes.</small>
+      ⚠️ ${isConexao
+        ? 'Servidor não encontrado. Certifique-se de que o <strong>planalytics-server</strong> está rodando.'
+        : 'Erro ao gerar análise: ' + err.message}
+      <br><small style="opacity:.7;margin-top:.35rem;display:block">
+        ${isConexao ? 'Execute: <code>node server.js</code> na pasta do servidor.' : 'Tente novamente em alguns instantes.'}
+      </small>
     </div>`;
   } finally {
     btn.disabled = false;
