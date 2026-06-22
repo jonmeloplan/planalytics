@@ -394,6 +394,11 @@
     .desvio-title-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 6px; vertical-align: middle; }
     .desvio-title-dot.red { background: #ef4444; }
     .desvio-title-dot.green { background: #22c55e; }
+    .desvio-title-dot.neutral { background: #94a3b8; }
+    .physical-status { display: block; font-size: .72rem; font-weight: 700; margin-top: .15rem; color: #64748b; }
+    .financial-status-card.atrasado .physical-value, .financial-status-card.atrasado .physical-status { color: #dc2626; }
+    .financial-status-card.adiantado .physical-value, .financial-status-card.adiantado .physical-status { color: #16a34a; }
+    .financial-status-card.noprazo .physical-value, .financial-status-card.noprazo .physical-status { color: #64748b; }
 
     /* === BOTÃO EXPANDIR === */
     .expand-work-btn {
@@ -1687,6 +1692,16 @@ function formatarPercentualCurva(valor) {
   return n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
 }
 
+// Formata um desvio (diferença entre previsto e real). Diferente de formatarPercentualCurva,
+// NÃO trava o valor entre 0-100, pois desvio pode ser negativo (obra adiantada) ou maior que 100.
+function formatarDesvioCurva(valor) {
+  if(valor===null||valor===undefined||valor==='') return '-';
+  const n = Number(valor);
+  if(isNaN(n)) return '-';
+  const sinal = n > 0 ? '+' : '';
+  return sinal + n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';
+}
+
 function formatarHHCurva(valor) {
   const n = normalizarHHCurva(valor);
   if(n===null) return '-';
@@ -1820,12 +1835,14 @@ function renderGraficoPerformanceFisica(o) {
 
 function renderPerformanceFisica(o) {
   const c = resumoCurvaFisica(o);
+  const statusDesvio = c.desvio > 0 ? 'red' : (c.desvio < 0 ? 'green' : 'neutral');
+  const labelDesvio = c.desvio > 0 ? 'Atrasado' : (c.desvio < 0 ? 'Adiantado' : 'No prazo');
   return `<div class="performance-panel physical-performance">
     <h2>PERFORMANCE FÍSICA</h2>
     <div class="physical-cards">
       <div class="physical-card"><span class="physical-label">Avanço Previsto</span><span class="physical-value">${formatarPercentualCurva(c.previsto)}</span></div>
       <div class="physical-card"><span class="physical-label">Avanço Real</span><span class="physical-value">${formatarPercentualCurva(c.real)}</span></div>
-      <div class="physical-card"><span class="physical-label">Desvio<span class="desvio-title-dot ${c.desvio>0?'red':'green'}"></span></span><span class="physical-value">${formatarPercentualCurva(c.desvio)}</span></div>
+      <div class="physical-card"><span class="physical-label">Desvio<span class="desvio-title-dot ${statusDesvio}"></span></span><span class="physical-value">${formatarDesvioCurva(c.desvio)}</span><small class="physical-status">${labelDesvio}</small></div>
       <div class="physical-card"><span class="physical-label">HH Previsto</span><span class="physical-value">${formatarHHCurva(c.hhPrevisto)}</span></div>
       <div class="physical-card"><span class="physical-label">HH Real</span><span class="physical-value">${formatarHHCurva(c.hhReal)}</span></div>
     </div>
@@ -1925,7 +1942,11 @@ function resumoCurvaFinanceira(o) {
   // soma de rsPrevisto somente até a última linha que tem rsReal informado
   let previstoAteReal = 0;
   for(let i = 0; i <= ultimaReal; i++) previstoAteReal += Number((dados[i]||{}).rsPrevisto || 0);
-  return { previstoTotal, previstoAteReal, realTotal, saldo: previstoAteReal - realTotal, dados };
+  // Desvio percentual: compara o % acumulado previsto x real no mesmo ponto no tempo (última medição real)
+  const pctPrevistoNoPonto = previstoTotal > 0 ? (previstoAteReal / previstoTotal) * 100 : 0;
+  const pctRealNoPonto = previstoTotal > 0 ? (realTotal / previstoTotal) * 100 : 0;
+  const desvioPct = ultimaReal >= 0 ? +(pctPrevistoNoPonto - pctRealNoPonto).toFixed(2) : null;
+  return { previstoTotal, previstoAteReal, realTotal, saldo: previstoAteReal - realTotal, desvioPct, dados };
 }
 
 // Converte valor decimal (0.0–1.0) para percentual (0–100). Robusto para ambos os formatos.
@@ -2041,13 +2062,19 @@ function renderPerformanceFinanceira(o) {
   const c = resumoCurvaFinanceira(o);
   const contrato = Number(o.contrato || 0);
   const saldoContrato = contrato - c.realTotal;
+  const temDesvio = c.desvioPct !== null;
+  // No financeiro a lógica é invertida em relação ao físico: gastar/executar ACIMA do previsto é positivo (verde),
+  // ficar ABAIXO do previsto é negativo (vermelho) — sinaliza atraso de execução ou de pagamento.
+  const statusFin = !temDesvio ? 'noprazo' : (c.desvioPct < 0 ? 'adiantado' : (c.desvioPct > 0 ? 'atrasado' : 'noprazo'));
+  const labelFin = !temDesvio ? 'Sem medição' : (c.desvioPct < 0 ? 'Acima do previsto' : (c.desvioPct > 0 ? 'Abaixo do previsto' : 'Conforme previsto'));
   return `<div class="performance-panel financial-performance">
     <h2>PERFORMANCE FINANCEIRA</h2>
     <div class="physical-cards">
       <div class="physical-card" title="Soma total da coluna R$ Previsto da curva financeira"><span class="physical-label">R$ Contrato (Mi)</span><span class="physical-value" style="color:#334155">${mi(c.previstoTotal)}</span></div>
       <div class="physical-card" title="Soma de R$ Previsto até a última linha com R$ Real informado"><span class="physical-label">R$ Previsto (Mi)</span><span class="physical-value" style="color:#2563eb">${mi(c.previstoAteReal)}</span></div>
-      <div class="physical-card" title="Soma total da coluna R$ Real"><span class="physical-label">R$ Real (Mi)</span><span class="physical-value" style="color:#16a34a">${mi(c.realTotal)}</span></div>
-      <div class="physical-card" title="R$ Contrato (Previsto Total) − R$ Real"><span class="physical-label">R$ Saldo (Mi)</span><span class="physical-value" style="color:${(c.previstoTotal-c.realTotal)>=0?'#16a34a':'#dc2626'}">${mi(c.previstoTotal-c.realTotal)}</span></div>
+      <div class="physical-card" title="Soma total da coluna R$ Real"><span class="physical-label">R$ Real (Mi)</span><span class="physical-value" style="color:#334155">${mi(c.realTotal)}</span></div>
+      <div class="physical-card financial-status-card ${statusFin}" title="Compara o % acumulado previsto x real no ponto da última medição. Acima do previsto = positivo (mais executado/pago do que o programado); Abaixo do previsto = negativo (atraso de execução ou pagamento)."><span class="physical-label">Desvio %<span class="desvio-title-dot ${statusFin==='atrasado'?'red':(statusFin==='adiantado'?'green':'neutral')}"></span></span><span class="physical-value">${temDesvio?formatarDesvioCurva(-c.desvioPct):'-'}</span><small class="physical-status">${labelFin}</small></div>
+      <div class="physical-card" title="R$ Contrato (Previsto Total) − R$ Real"><span class="physical-label">R$ Saldo (Mi)</span><span class="physical-value" style="color:#334155">${mi(c.previstoTotal-c.realTotal)}</span></div>
     </div>
     <div class="physical-chart">
       <h3>CURVA DE AVANÇO FINANCEIRO</h3>
