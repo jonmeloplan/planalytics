@@ -234,37 +234,70 @@
     .add-row-btn { height: 2.55rem; padding: 0 1rem; border: 0; border-radius: .55rem; background: #075be8; color: white; font-weight: 900; cursor: pointer; font-size: .9rem; }
     .add-row-btn.default-btn { background: #eef6ff; color: #064fe0; border: 1px solid #bfdbfe; }
     .add-row-btn.import-btn { background: #064fe0; color: #fff; border: 1px solid #064fe0; }
-    .cronograma-table-wrap { width: 100%; overflow: auto; border: 1px solid #d7e6f8; border-radius: .75rem; max-height: 62vh; background: white; }
-    .cronograma-table { width: 100%; min-width: 1180px; border-collapse: separate; border-spacing: 0; font-size: .78rem; }
-    .cronograma-table th { position: sticky; top: 0; z-index: 1; background: #e8f2fc; color: #073b8e; font-size: .72rem; text-transform: uppercase; padding: .45rem .35rem; }
-    .cronograma-table td { padding: .35rem; }
-    .cronograma-table input { width: 100%; height: 1.75rem; border: 1px solid #c8d9ec; border-radius: .32rem; padding: 0 .35rem; font-size: .76rem; }
-    .duration-wrap { display: flex; align-items: center; gap: .25rem; }
-    .duration-wrap input { flex: 1; min-width: 0; text-align: center; }
-    .duration-suffix { font-size: .78rem; font-weight: 900; color: #475569; }
-    .percent-wrap { display: flex; align-items: center; gap: .25rem; }
-    .percent-wrap input { flex: 1; min-width: 3.7rem; text-align: right; font-weight: 800; }
-    .percent-suffix { font-size: .78rem; font-weight: 900; color: #475569; }
-    .delete-row-btn { border: 0; background: #fee2e2; color: #991b1b; border-radius: .4rem; height: 2rem; padding: 0 .6rem; font-weight: 900; cursor: pointer; }
+    .cronograma-table-wrap { width: 100%; overflow: auto; border: 1px solid #d7e6f8; border-radius: .75rem; max-height: 68vh; background: white; }
+    .cronograma-table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: .68rem; }
+    .cronograma-table th { position: sticky; top: 0; z-index: 2; background: linear-gradient(180deg,#eef5fd,#e4f0fb); color: #1e3a6e; font-size: .6rem; text-transform: uppercase; letter-spacing: .02em; padding: 0; border: 1px solid #d3e2f3; border-top: 0; font-weight: 800; height: 2rem; }
+    .th-flex { display: flex; align-items: center; justify-content: space-between; gap: .15rem; height: 100%; padding: 0 .3rem; }
+    .th-flex span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .th-filter-btn { flex: 0 0 auto; border: 0; background: transparent; color: #5e7ba8; font-size: .6rem; cursor: pointer; padding: .1rem .2rem; border-radius: .2rem; line-height: 1; }
+    .th-filter-btn:hover { background: #d6e6fb; color: #073b8e; }
+    .th-filter-btn.filtro-ativo { background: #2563eb; color: #fff; }
+    .cronograma-table th:first-child, .cronograma-table td:first-child { border-left: 0; }
+    .cronograma-table th:last-child, .cronograma-table td:last-child { border-right: 0; }
+    .cronograma-table td { padding: 0; border: 1px solid #ebf1f8; }
+    .cronograma-table tbody tr:nth-child(even) { background: #fafcff; }
+    .cronograma-table tbody tr:hover td { background: #f3f8ff; }
+    .cronograma-table input { width: 100%; height: 2.2rem; border: 0; border-radius: 0; background: transparent; padding: 0 .4rem; font-size: .66rem; font-weight: 500; color: #1e293b; }
+    .cronograma-table input:focus { outline: 2px solid #2563eb; outline-offset: -2px; background: #eef6ff; position: relative; z-index: 1; }
+    .cronograma-table input:disabled { background: transparent; color: #475569; }
+    .duration-wrap { display: flex; align-items: center; gap: .1rem; height: 2.2rem; padding: 0 .4rem; }
+    .duration-wrap input { flex: 1; min-width: 0; text-align: center; padding: 0; height: 100%; }
+    .duration-suffix { font-size: .64rem; font-weight: 900; color: #475569; }
+    .percent-wrap { display: flex; align-items: center; gap: .1rem; height: 2.2rem; padding: 0 .4rem; }
+    .percent-wrap input { flex: 1; min-width: 2.4rem; text-align: right; font-weight: 800; padding: 0; height: 100%; }
+    .percent-suffix { font-size: .64rem; font-weight: 900; color: #475569; }
+    .delete-row-btn { border: 0; background: #fee2e2; color: #991b1b; border-radius: .35rem; height: 1.7rem; padding: 0 .4rem; font-weight: 900; cursor: pointer; font-size: .85rem; }
     .delete-btn { border: 0; background: #fee2e2; color: #991b1b; border-radius: .4rem; height: 2rem; padding: 0 .6rem; font-weight: 900; cursor: pointer; }
     .cronograma-summary-row td { background: #eaf4ff; font-weight: 900; color: #07143f; }
     .cronograma-resumo-eap input { font-weight: 900; background: #eef6ff; }
     .readonly-cell { white-space: nowrap; }
-    .readonly-input { background: #f1f5f9; color: #334155; font-weight: 800; }
-    .acao-cell { text-align: center; width: 4.8rem; }
+    .readonly-input { background: transparent; color: #334155; font-weight: 800; }
+    .del-cell { width: 1.6rem; min-width: 1.6rem; max-width: 1.6rem; text-align: center; background: #fff !important; border: 0 !important; padding: 0 !important; }
+    .delete-x-btn { border: 0; background: transparent; color: #dc2626; font-weight: 900; font-size: .85rem; width: 100%; height: 100%; cursor: pointer; opacity: .55; }
+    .delete-x-btn:hover { opacity: 1; background: #fee2e2; border-radius: .25rem; }
 
-    /* Colunas cronograma */
-    .cronograma-table th:nth-child(1), .cronograma-table td:nth-child(1) { width: 4.2rem; min-width: 4.2rem; }
-    .cronograma-table th:nth-child(2), .cronograma-table td:nth-child(2) { width: 5.8rem; min-width: 5.8rem; max-width: 5.8rem; }
-    .cronograma-table th:nth-child(3), .cronograma-table td:nth-child(3) { width: 22rem; min-width: 18rem; }
-    .cronograma-table th:nth-child(4), .cronograma-table td:nth-child(4) { width: 5.4rem; min-width: 5.4rem; max-width: 5.4rem; }
-    .cronograma-table th:nth-child(5), .cronograma-table td:nth-child(5),
+    /* Tabelas de Curva Física e Financeira — largura própria, independente do Cronograma */
+    .curva-table { min-width: 0 !important; }
+    .curva-table th:nth-child(2), .curva-table td:nth-child(2) { width: 7rem; min-width: 7rem; max-width: 7rem; }
+    .curva-table th:nth-child(n+3), .curva-table td:nth-child(n+3) { width: 7.5rem; min-width: 6rem; }
+    .curva-table th:nth-child(2), .curva-table td:nth-child(2) { text-align: center; }
+    .cronograma-table th:nth-child(2), .cronograma-table td:nth-child(2) { width: 2.4rem; min-width: 2.4rem; }
+    .cronograma-table th:nth-child(3), .cronograma-table td:nth-child(3) { width: 4rem; min-width: 4rem; max-width: 4rem; }
+    .cronograma-table th:nth-child(4), .cronograma-table td:nth-child(4) { width: 13rem; min-width: 10rem; }
+    .cronograma-table th:nth-child(5), .cronograma-table td:nth-child(5) { width: 3.6rem; min-width: 3.6rem; max-width: 3.6rem; }
     .cronograma-table th:nth-child(6), .cronograma-table td:nth-child(6),
-    .cronograma-table th:nth-child(9), .cronograma-table td:nth-child(9),
-    .cronograma-table th:nth-child(10), .cronograma-table td:nth-child(10) { width: 7.8rem; min-width: 7.8rem; max-width: 7.8rem; }
-    .cronograma-table th:nth-child(7), .cronograma-table td:nth-child(7) { width: 6.2rem; min-width: 6.2rem; max-width: 6.2rem; }
-    .cronograma-table th:nth-child(8), .cronograma-table td:nth-child(8) { width: 5.2rem; min-width: 5.2rem; max-width: 5.2rem; }
-    .cronograma-table th:nth-child(11), .cronograma-table td:nth-child(11) { width: 4.8rem; min-width: 4.8rem; max-width: 4.8rem; }
+    .cronograma-table th:nth-child(7), .cronograma-table td:nth-child(7),
+    .cronograma-table th:nth-child(10), .cronograma-table td:nth-child(10),
+    .cronograma-table th:nth-child(11), .cronograma-table td:nth-child(11) { width: 5.6rem; min-width: 5.6rem; max-width: 5.6rem; }
+    .cronograma-table th:nth-child(8), .cronograma-table td:nth-child(8) { width: 4.4rem; min-width: 4.4rem; max-width: 4.4rem; }
+    .cronograma-table th:nth-child(9), .cronograma-table td:nth-child(9) { width: 3.6rem; min-width: 3.6rem; max-width: 3.6rem; }
+
+    /* Painel de filtro estilo Excel/MS Project */
+    .filtro-coluna-panel { display: none; flex-direction: column; position: fixed; width: 210px; max-height: 280px; background: #fff; border: 1px solid #c8d9ec; border-radius: .55rem; box-shadow: 0 .6rem 1.6rem rgba(15,23,42,.25); z-index: 10000; font-size: .72rem; overflow: hidden; }
+    .filtro-coluna-busca { padding: .5rem; border-bottom: 1px solid #e8f0fb; }
+    .filtro-coluna-busca input { width: 100%; height: 1.8rem; border: 1px solid #d3e2f3; border-radius: .35rem; padding: 0 .5rem; font-size: .7rem; }
+    .filtro-coluna-acoes-top { display: flex; gap: .4rem; padding: .35rem .5rem; border-bottom: 1px solid #e8f0fb; }
+    .filtro-coluna-acoes-top button { flex: 1; border: 0; background: #eef6ff; color: #075be8; font-weight: 700; font-size: .64rem; padding: .3rem; border-radius: .3rem; cursor: pointer; }
+    .filtro-coluna-acoes-top button:hover { background: #dbeafe; }
+    .filtro-coluna-lista { flex: 1; overflow-y: auto; padding: .3rem .5rem; max-height: 150px; }
+    .filtro-coluna-lista label { display: flex; align-items: center; gap: .45rem; padding: .28rem 0; cursor: pointer; }
+    .filtro-coluna-lista label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .filtro-coluna-rodape { display: flex; gap: .4rem; padding: .45rem .5rem; border-top: 1px solid #e8f0fb; background: #f8fbff; }
+    .filtro-coluna-ok, .filtro-coluna-cancelar { flex: 1; border: 0; border-radius: .35rem; padding: .4rem; font-weight: 800; font-size: .68rem; cursor: pointer; }
+    .filtro-coluna-ok { background: #2563eb; color: #fff; }
+    .filtro-coluna-ok:hover { background: #1d4ed8; }
+    .filtro-coluna-cancelar { background: #eef2f7; color: #475569; }
+    .filtro-coluna-cancelar:hover { background: #e2e8f0; }
 
     /* === GANTT === */
     .gantt-panel { margin-top: 1rem; background: #fff; border: 1px solid #d7e6f8; border-radius: .85rem; padding: 1rem; overflow: hidden; box-shadow: 0 .35rem 1rem rgba(15,23,42,.08); }
@@ -287,6 +320,62 @@
     .gantt-percent-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: .68rem; font-weight: 900; color: #fff; z-index: 3; text-shadow: 0 1px 2px rgba(15,23,42,.45); white-space: nowrap; pointer-events: none; }
     .gantt-empty { padding: 1.5rem; text-align: center; color: #64748b; font-weight: 800; }
     .gantt-row.gantt-summary { background: #eef6ff; font-weight: 900; }
+
+    /* === CRONOGRAMA + GANTT UNIFICADOS (lado a lado, estilo MS Project) === */
+    .cronograma-split { display: flex; width: 100%; border: 1px solid #d7e6f8; border-radius: .75rem; overflow: hidden; background: white; }
+    .cronograma-split .cronograma-table-wrap { flex: 0 0 auto; border: 0; border-radius: 0; border-right: 2px solid #c8d9ec; max-height: 62vh; }
+    
+    .cronograma-split .cronograma-table thead tr { height: 2.15rem; }
+    .gantt-side-wrap { flex: 1 1 auto; overflow: auto; max-height: 62vh; min-width: 0; background: linear-gradient(180deg,#f8fbff,#ffffff); }
+    .gantt-col-th { padding: 0 !important; vertical-align: top; background: #eaf4ff; }
+    .gantt-col-td { padding: 0 !important; white-space: nowrap; }
+    .gantt-table-header { position: relative; height: 2rem; }
+    .gantt-table-cell { position: relative; height: 100%; min-height: 2.5rem; }
+    .cronograma-table tbody tr { height: 2.2rem; }
+    .gantt-table-cell .gantt-bar { height: .7rem; }
+    .gantt-table-cell .gantt-p { top: .25rem; }
+    .gantt-table-cell .gantt-r { top: 1.15rem; }
+
+    /* Divisória arrastável/clicável entre os dados e o Gantt */
+    .gantt-divisor-th, .gantt-divisor-td { width: 1.1rem; min-width: 1.1rem; max-width: 1.1rem; padding: 0 !important; background: #dbe7f5; border-left: 1px solid #b9d2ee; border-right: 1px solid #b9d2ee; }
+    .gantt-divisor-handle { width: 100%; height: 100%; cursor: col-resize; display: flex; align-items: center; justify-content: center; }
+    .gantt-divisor-btn { display: flex; align-items: center; justify-content: center; width: 1.15rem; height: 2.2rem; background: #fff; color: #2563eb; font-size: .85rem; font-weight: 900; border-radius: 999px; border: 1px solid #c8d9ec; cursor: pointer; user-select: none; box-shadow: 0 .1rem .3rem rgba(15,23,42,.12); transition: background .15s, color .15s; }
+    .gantt-divisor-btn:hover { background: #2563eb; color: #fff; }
+    /* Modo compacto: oculta colunas secundárias para dar mais espaço ao Gantt */
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(1), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(1),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(5), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(5),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(6), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(6),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(7), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(7),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(8), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(8),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(9), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(9),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(10), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(10),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(11), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(11) { display: none; }
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(4), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(4) { width: 16rem; min-width: 16rem; }
+
+    .gantt-side-header { position: sticky; top: 0; z-index: 2; height: 2.15rem; background: #eaf4ff; border-bottom: 1px solid #d7e6f8; min-width: var(--gantt-width,640px); }
+    .gantt-side-row { position: relative; height: 2.5rem; min-width: var(--gantt-width,640px); border-bottom: 1px solid #e2e8f0; }
+    .gantt-side-row.gantt-summary { background: #eaf4ff; }
+    .gantt-side-row .gantt-bar { height: .7rem; }
+    .gantt-side-row .gantt-p { top: .42rem; }
+    .gantt-side-row .gantt-r { top: 1.36rem; }
+
+    .gantt-eap-resumo .gantt-bar { background: #334155; }
+    .gantt-scale { position: relative; height: 100%; }
+    .gantt-trimestres { position: relative; height: .7rem; border-bottom: 1px solid #c8d9ec; }
+    .gantt-trimestre { position: absolute; top: 0; height: .7rem; line-height: .7rem; font-size: .6rem; font-weight: 900; color: #073b8e; text-align: center; border-right: 1px solid #c8d9ec; overflow: hidden; white-space: nowrap; }
+    .gantt-meses { position: relative; height: 1.3rem; }
+    .gantt-meses .gantt-month { position: absolute; top: 0; height: 1.3rem; line-height: 1.3rem; font-size: .62rem; font-weight: 800; color: #334155; text-align: center; border-right: 1px solid #dbe7f5; }
+    .gantt-marco { position: absolute; width: .7rem; height: .7rem; border-radius: .15rem; box-shadow: 0 .15rem .3rem rgba(15,23,42,.3); transform: translateX(-50%); }
+    .gantt-marco-p { background: #2563eb; top: .25rem; }
+    .gantt-marco-r { background: #166534; top: 1.15rem; }
+    .gantt-marco .gantt-date { position: absolute; left: calc(100% + .35rem); top: 50%; transform: translateY(-50%); font-size: .62rem; color: #334155; font-weight: 800; white-space: nowrap; }
+    .gantt-resumo-p, .gantt-resumo-r { height: .85rem !important; border-radius: 2px; }
+    .gantt-resumo-p { background: #2563eb; top: .2rem !important; }
+    .gantt-resumo-r { background: #cbd5e1; top: 1.1rem !important; }
+
+
+    /* === MODAL GANTT AMPLIADO === */
+
 
     /* === EAP (TIMELINE EXECUTIVA) === */
     .timeline-exec-section {
@@ -1460,16 +1549,18 @@ function excluirLinhaCronograma(uid, idx) {
   renderizarArvore();
 }
 
-/* ─── 11. CRONOGRAMA - RENDERIZAÇÃO + GANTT ─── */
-function renderGanttCronograma(atividades) {
-  const monthWidth = 65;
+/* ─── 11. CRONOGRAMA - RENDERIZAÇÃO + GANTT LATERAL ─── */
+
+function calcularBarrasGantt(atividades, resumo, monthWidth) {
+  monthWidth = monthWidth || 65;
   const valid = d => d && !isNaN(new Date(d+'T00:00:00'));
   const normAv = v => { let n=Number(String(v||0).replace('%','').replace(',','.')); if(isNaN(n))n=0; return Math.max(0,Math.min(100,+n.toFixed(2))); };
   const fmtPct = v => { const n=normAv(v); return `${Number.isInteger(n)?n.toFixed(0):n.toFixed(2)}%`; };
 
+  const todasLinhas = [resumo, ...atividades];
   const datas = [];
-  atividades.forEach(a => ['inicioLB','terminoLB','inicio','termino'].forEach(c => { if(valid(a[c])) datas.push(new Date(a[c]+'T00:00:00')); }));
-  if(!datas.length) return `<div class="gantt-panel"><h3>GANTT DO CRONOGRAMA</h3><div class="gantt-empty">Aguardando dados do cronograma para gerar o Gantt</div></div>`;
+  todasLinhas.forEach(a => ['inicioLB','terminoLB','inicio','termino'].forEach(c => { if(valid(a[c])) datas.push(new Date(a[c]+'T00:00:00')); }));
+  if(!datas.length) return null;
 
   const minData = new Date(Math.min(...datas));
   const maxData = new Date(Math.max(...datas));
@@ -1486,39 +1577,62 @@ function renderGanttCronograma(atividades) {
   const posPx = d => valid(d) ? Math.max(0,((new Date(d+'T00:00:00')-min)/(1000*60*60*24))*pxPorDia) : 0;
   const widPx = (i,f) => { if(!valid(i)||!valid(f)) return 0; const ini=new Date(i+'T00:00:00'),fim=new Date(f+'T00:00:00'); return Math.max(6,(((fim-ini)/(1000*60*60*24)+1)*pxPorDia)); };
 
-  const mesesHtml = mesesLista.map((m,idx)=>`<span class="gantt-month" style="left:${idx*monthWidth}px">${meses[m.getMonth()]}/${m.getFullYear()}</span>`).join('');
+  const trimestresHtml = (() => {
+    let html = '', idx = 0;
+    while(idx < mesesLista.length) {
+      const m = mesesLista[idx];
+      const tri = Math.floor(m.getMonth()/3)+1;
+      let span = 0;
+      while(idx < mesesLista.length && Math.floor(mesesLista[idx].getMonth()/3)+1 === tri && mesesLista[idx].getFullYear() === m.getFullYear()) { idx++; span++; }
+      html += `<span class="gantt-trimestre" style="left:${(idx-span)*monthWidth}px;width:${span*monthWidth}px">T${tri} · ${m.getFullYear()}</span>`;
+    }
+    return html;
+  })();
+  const mesesHtml = mesesLista.map((m,idx)=>`<span class="gantt-month" style="left:${idx*monthWidth}px;width:${monthWidth}px">${meses[m.getMonth()]}</span>`).join('');
+  const headerHtml = `<div class="gantt-trimestres">${trimestresHtml}</div><div class="gantt-meses">${mesesHtml}</div>`;
 
-  const barra = (tipo,i,f,av=0) => {
+  const barra = (tipo,i,f,av=0,isResumo=false) => {
     if(!valid(i)||!valid(f)) return '';
     const left=posPx(i), width=widPx(i,f), pct=normAv(av), pctLabel=fmtPct(av);
-    return `<div class="gantt-bar gantt-${tipo.toLowerCase()}" style="left:${left}px;width:${width}px">
-      <span class="gantt-letter">${tipo}</span>
+    if(i===f) return `<div class="gantt-marco gantt-marco-${tipo.toLowerCase()}" style="left:${left}px" title="Marco — ${fmt(f)}"><span class="gantt-date">${fmt(f)}</span></div>`;
+    return `<div class="gantt-bar gantt-${isResumo?'resumo-':''}${tipo.toLowerCase()}" style="left:${left}px;width:${width}px">
       ${tipo==='R'?`<span class="gantt-progress" style="width:${pct}%"></span><span class="gantt-percent-label">${pctLabel}</span>`:''}
       <span class="gantt-date">${fmt(f)}</span>
     </div>`;
   };
 
-  const linhas = atividades.map(a => {
-    const nivel = calcularNivelPorEAP(a.eap||'1');
-    return `<div class="gantt-row ${a.isResumo?'gantt-summary':''}" style="--gantt-width:${ganttWidth}px">
-      <div class="gantt-info" style="padding-left:${Math.max(0,nivel-1)*1.1}rem">${esc(a.eap||'')}<span class="gantt-desc">${esc(a.descricao||'Sem descrição')}</span></div>
-      <div class="gantt-area">${barra('P',a.inicioLB,a.terminoLB)}${barra('R',a.inicio,a.termino,a.avancoFisico)}</div>
-    </div>`;
-  }).join('');
+  const barrasResumo = barra('P',resumo.inicioLB,resumo.terminoLB,0,true) + barra('R',resumo.inicio,resumo.termino,resumo.avancoFisico,true);
+  const barrasPorLinha = atividades.map(a => barra('P',a.inicioLB,a.terminoLB,0,!!a.isResumo) + barra('R',a.inicio,a.termino,a.avancoFisico,!!a.isResumo));
 
-  return `<div class="gantt-panel"><h3>GANTT DO CRONOGRAMA</h3><div class="gantt-wrap" style="--gantt-width:${ganttWidth}px"><div class="gantt-months"><div>Atividade</div><div class="gantt-scale">${mesesHtml}</div></div>${linhas||'<div class="gantt-empty">Nenhuma atividade cadastrada.</div>'}</div></div>`;
+  return { ganttWidth, headerHtml, barrasResumo, barrasPorLinha };
 }
+
+function renderGanttLateralCronograma(atividades, resumo, monthWidth) {
+  const g = calcularBarrasGantt(atividades, resumo, monthWidth);
+  if(!g) return { width: 640, html: `<div class="gantt-empty">Aguardando dados do cronograma para gerar o Gantt</div>` };
+  const linhaResumo = `<div class="gantt-side-row gantt-summary">${g.barrasResumo}</div>`;
+  const linhas = g.barrasPorLinha.map((b,i)=>`<div class="gantt-side-row ${atividades[i].isResumo?'gantt-eap-resumo':''}">${b}</div>`).join('');
+  return { width: g.ganttWidth, html: `<div class="gantt-side-header" style="--gantt-width:${g.ganttWidth}px"><div class="gantt-scale">${g.headerHtml}</div></div>${linhaResumo}${linhas}` };
+}
+
 
 function renderCronogramaObra(o) {
   ordenarCronograma(o);
   const dados = cronogramaDaObra(o);
   const res = resumoCronograma(o);
+  if(window._filtrosColunaUid !== o.uid) { window.filtrosColuna = {}; window._filtrosColunaUid = o.uid; }
+  window._cronogramaCtxAtual = { dados, uid: o.uid };
+  const g = calcularBarrasGantt(dados, res, 65);
+  const gw = g ? g.ganttWidth : 640;
+
+  const colGantt = (i) => `<td class="gantt-col-td"><div class="gantt-table-cell" style="width:${gw}px">${g?(i===-1?g.barrasResumo:g.barrasPorLinha[i]):''}</div></td>`;
 
   const linhasTabela = dados.length ? dados.map((r,i) => {
     const isRes = !!r.isResumo;
     const dis = isRes || !podeEditar() ? 'disabled' : '';
     const nivel = calcularNivelPorEAP(r.eap||'1');
-    return `<tr class="${isRes?'cronograma-resumo-eap':''}">
+    return `<tr data-idx="${i}" class="${isRes?'cronograma-resumo-eap':''}">
+      <td class="del-cell"><button class="delete-x-btn edit-only" onclick="excluirLinhaCronograma('${o.uid}',${i})" title="Excluir linha">✕</button></td>
       <td class="nivel-cell"><input class="readonly-input" disabled type="number" value="${esc(nivel)}"></td>
       <td class="eap-cell"><input value="${esc(r.eap||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'eap',this.value)"></td>
       <td><input style="padding-left:${Math.max(0,nivel-1)*1.1}rem" value="${esc(r.descricao||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'descricao',this.value)"></td>
@@ -1529,9 +1643,10 @@ function renderCronogramaObra(o) {
       <td><div class="duration-wrap"><input class="readonly-input" disabled type="number" value="${esc(r.duracao||'')}"><span class="duration-suffix">d</span></div></td>
       <td class="date-cell"><input ${dis} type="date" value="${esc(r.inicio||'')}" onblur="atualizarCronograma('${o.uid}',${i},'inicio',this.value)"></td>
       <td class="date-cell"><input ${dis} type="date" value="${esc(r.termino||'')}" onblur="atualizarCronograma('${o.uid}',${i},'termino',this.value)"></td>
-      <td class="acao-cell"><button class="delete-row-btn edit-only" onclick="excluirLinhaCronograma('${o.uid}',${i})">Excluir</button></td>
+      <td class="gantt-divisor-td"></td>
+      ${colGantt(i)}
     </tr>`;
-  }).join('') : `<tr><td colspan="11" style="text-align:center;color:#64748b;padding:1.5rem">Nenhuma atividade cadastrada.</td></tr>`;
+  }).join('') : `<tr><td colspan="12" style="text-align:center;color:#64748b;padding:1.5rem">Nenhuma atividade cadastrada.</td><td class="gantt-col-td"></td></tr>`;
 
   $('content').innerHTML = `
     <div class="obra-head">
@@ -1543,7 +1658,7 @@ function renderCronogramaObra(o) {
     </div>
     <div class="cronograma-panel">
       <div class="cronograma-head">
-        <div><h2>CRONOGRAMA DA OBRA</h2><p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada.</p></div>
+        <div><h2>CRONOGRAMA DA OBRA</h2><p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada — Gantt integrado, estilo MS Project. Arraste a seta ‹ para mais espaço no Gantt.</p></div>
         <div class="cronograma-actions-right">
           ${podeEditar()?`<button class="add-row-btn" class="edit-only-wrap" onclick="adicionarLinhaCronograma('${o.uid}')">＋ Adicionar Linha</button><button class="add-row-btn import-btn" class="edit-only-wrap" onclick="selecionarImportacaoCronograma('${o.uid}')">Importar Cronograma</button><button class="add-row-btn clear-btn" class="edit-only-wrap" onclick="limparCronograma('${o.uid}')">🗑 Limpar Dados</button>`:''}<button class="add-row-btn default-btn" onclick="baixarModeloDefaultCronograma()">Baixar Modelo Default</button>
           <input id="cronogramaImportInput" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarCronogramaExcel(event,'${o.uid}')">
@@ -1551,20 +1666,166 @@ function renderCronogramaObra(o) {
       </div>
       <div class="cronograma-table-wrap">
         <table class="cronograma-table">
-          <thead><tr><th>NÍVEL</th><th>EAP</th><th>DESCRIÇÃO</th><th>DUR. LB</th><th>INÍCIO LB</th><th>TÉRMINO LB</th><th>AV. FÍS %</th><th>DURAÇÃO</th><th>INÍCIO</th><th>TÉRMINO</th><th>AÇÕES</th></tr></thead>
+          <thead>
+            <tr>
+              <th class="del-cell"></th>
+              ${['NÍV','EAP','DESCRIÇÃO','DUR LB','INÍCIO LB','TÉRM LB','AV.FÍS%','DURAÇÃO','INÍCIO','TÉRMINO'].map((lbl,i)=>`<th><div class="th-flex"><span>${lbl}</span><button class="th-filter-btn" data-col="${i+1}" onclick="abrirFiltroColuna(event,${i+1})" title="Filtrar">▾</button></div></th>`).join('')}
+              <th class="gantt-divisor-th"><div class="gantt-divisor-handle" onmousedown="iniciarArrasteGantt(event)" title="Arraste para redimensionar"><span class="gantt-divisor-btn" onmousedown="event.stopPropagation()" onclick="toggleCompactarCronograma(event)" title="Expandir/recolher área do Gantt">‹</span></div></th>
+              <th class="gantt-col-th"><div class="gantt-table-header" style="width:${gw}px">${g?g.headerHtml:''}</div></th>
+            </tr>
+          </thead>
           <tbody>
+
             <tr class="cronograma-summary-row">
+              <td class="del-cell"></td>
               <td>${celResumo('0')}</td><td>${celResumo('0')}</td><td>${celResumo(res.descricao)}</td>
               <td>${celResumo(res.duracaoLB?res.duracaoLB+' d':'')}</td><td>${celResumo(res.inicioLB?fmt(res.inicioLB):'')}</td><td>${celResumo(res.terminoLB?fmt(res.terminoLB):'')}</td>
               <td>${celResumo(res.avancoFisico,'percent')}</td><td>${celResumo(res.duracao?res.duracao+' d':'')}</td><td>${celResumo(res.inicio?fmt(res.inicio):'')}</td><td>${celResumo(res.termino?fmt(res.termino):'')}</td>
-              <td class="acao-cell">—</td>
+              <td class="gantt-divisor-td"></td>
+              ${colGantt(-1)}
             </tr>
             ${linhasTabela}
           </tbody>
         </table>
       </div>
-      ${renderGanttCronograma(dados)}
     </div>`;
+  setTimeout(() => { filtrarCronogramaTabela(); atualizarIconesFiltroAtivos(); }, 0);
+}
+
+function obterValorColunaCronograma(r, idx, nivel) {
+  switch(idx) {
+    case 1: return String(nivel);
+    case 2: return r.eap || '';
+    case 3: return r.descricao || '';
+    case 4: return r.duracaoLB ? r.duracaoLB+' d' : '';
+    case 5: return r.inicioLB ? fmt(r.inicioLB) : '';
+    case 6: return r.terminoLB ? fmt(r.terminoLB) : '';
+    case 7: return (Number(r.avancoFisico)||0)+'%';
+    case 8: return r.duracao ? r.duracao+' d' : '';
+    case 9: return r.inicio ? fmt(r.inicio) : '';
+    case 10: return r.termino ? fmt(r.termino) : '';
+  }
+  return '';
+}
+
+function abrirFiltroColuna(e, idx) {
+  e.stopPropagation();
+  const ctx = window._cronogramaCtxAtual;
+  if(!ctx) return;
+  const valores = new Set();
+  ctx.dados.forEach(r => { const nivel = calcularNivelPorEAP(r.eap||'1'); valores.add(obterValorColunaCronograma(r, idx, nivel) || '(vazio)'); });
+  const lista = Array.from(valores).sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+  const ativos = (window.filtrosColuna||{})[idx];
+
+  let panel = document.getElementById('filtroColunaPanel');
+  if(!panel) { panel = document.createElement('div'); panel.id = 'filtroColunaPanel'; panel.className = 'filtro-coluna-panel'; document.body.appendChild(panel); }
+  panel.innerHTML = `
+    <div class="filtro-coluna-busca"><input type="text" placeholder="🔍 Buscar..." oninput="filtrarOpcoesPainel(this)"></div>
+    <div class="filtro-coluna-acoes-top"><button onclick="marcarTodosFiltro(true)">Selecionar tudo</button><button onclick="marcarTodosFiltro(false)">Limpar</button></div>
+    <div class="filtro-coluna-lista">${lista.map(v=>`<label><input type="checkbox" value="${esc(v)}" ${(!ativos||ativos.has(v))?'checked':''}><span>${esc(v)}</span></label>`).join('')}</div>
+    <div class="filtro-coluna-rodape"><button class="filtro-coluna-ok" onclick="aplicarFiltroColuna(${idx})">OK</button><button class="filtro-coluna-cancelar" onclick="fecharFiltroColuna()">Cancelar</button></div>`;
+  const btn = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  panel.style.display = 'flex';
+  const larguraPainel = 210;
+  panel.style.left = Math.min(rect.left, window.innerWidth-larguraPainel-12) + 'px';
+  panel.style.top = (rect.bottom + 4) + 'px';
+  setTimeout(() => document.addEventListener('click', fecharFiltroColunaFora), 0);
+}
+
+function fecharFiltroColunaFora(e) {
+  const panel = document.getElementById('filtroColunaPanel');
+  if(panel && !panel.contains(e.target)) fecharFiltroColuna();
+}
+
+function fecharFiltroColuna() {
+  const panel = document.getElementById('filtroColunaPanel');
+  if(panel) panel.style.display = 'none';
+  document.removeEventListener('click', fecharFiltroColunaFora);
+}
+
+function marcarTodosFiltro(v) {
+  document.querySelectorAll('#filtroColunaPanel .filtro-coluna-lista input[type=checkbox]').forEach(c => { if(c.closest('label').style.display !== 'none') c.checked = v; });
+}
+
+function filtrarOpcoesPainel(input) {
+  const termo = input.value.toLowerCase();
+  document.querySelectorAll('#filtroColunaPanel .filtro-coluna-lista label').forEach(lab => {
+    lab.style.display = lab.textContent.toLowerCase().includes(termo) ? '' : 'none';
+  });
+}
+
+function aplicarFiltroColuna(idx) {
+  const panel = document.getElementById('filtroColunaPanel');
+  if(!panel) return;
+  const checks = Array.from(panel.querySelectorAll('.filtro-coluna-lista input[type=checkbox]'));
+  const marcados = checks.filter(c => c.checked).map(c => c.value);
+  window.filtrosColuna = window.filtrosColuna || {};
+  if(marcados.length === checks.length || marcados.length === 0) delete window.filtrosColuna[idx];
+  else window.filtrosColuna[idx] = new Set(marcados);
+  fecharFiltroColuna();
+  filtrarCronogramaTabela();
+  atualizarIconesFiltroAtivos();
+}
+
+function atualizarIconesFiltroAtivos() {
+  document.querySelectorAll('.th-filter-btn').forEach(btn => {
+    const idx = Number(btn.dataset.col);
+    btn.classList.toggle('filtro-ativo', !!(window.filtrosColuna && window.filtrosColuna[idx]));
+  });
+}
+
+function filtrarCronogramaTabela() {
+  const ctx = window._cronogramaCtxAtual;
+  const tabela = document.querySelector('.cronograma-table');
+  if(!ctx || !tabela) return;
+  const filtros = window.filtrosColuna || {};
+  const indicesAtivos = Object.keys(filtros).map(Number);
+  tabela.querySelectorAll('tbody tr[data-idx]').forEach(tr => {
+    const i = Number(tr.dataset.idx);
+    const r = ctx.dados[i];
+    if(!r) return;
+    const nivel = calcularNivelPorEAP(r.eap||'1');
+    let visivel = true;
+    for(const idx of indicesAtivos) {
+      const valor = obterValorColunaCronograma(r, idx, nivel) || '(vazio)';
+      if(!filtros[idx].has(valor)) { visivel = false; break; }
+    }
+    tr.style.display = visivel ? '' : 'none';
+  });
+}
+
+function atualizarSetaDivisor() {
+  const wrap = document.querySelector('.cronograma-table-wrap');
+  const btn = document.querySelector('.gantt-divisor-btn');
+  if(!wrap || !btn) return;
+  btn.textContent = wrap.classList.contains('cronograma-compacto') ? '›' : '‹';
+}
+
+function toggleCompactarCronograma(e) {
+  if(e) e.stopPropagation();
+  const wrap = document.querySelector('.cronograma-table-wrap');
+  if(wrap) wrap.classList.toggle('cronograma-compacto');
+  atualizarSetaDivisor();
+}
+
+function iniciarArrasteGantt(e) {
+  e.preventDefault();
+  const wrap = document.querySelector('.cronograma-table-wrap');
+  if(!wrap) return;
+  const startX = e.clientX;
+  let moveu = false;
+  function mover(ev) {
+    const delta = ev.clientX - startX;
+    if(delta < -45 && !moveu) { wrap.classList.add('cronograma-compacto'); moveu = true; atualizarSetaDivisor(); }
+    else if(delta > 45 && moveu) { wrap.classList.remove('cronograma-compacto'); moveu = true; atualizarSetaDivisor(); }
+  }
+  function soltar() {
+    document.removeEventListener('mousemove', mover);
+    document.removeEventListener('mouseup', soltar);
+  }
+  document.addEventListener('mousemove', mover);
+  document.addEventListener('mouseup', soltar);
 }
 
 /* ─── 12. TIMELINE EXECUTIVA (EAP GANTT) ─── */
@@ -1887,13 +2148,13 @@ function excluirLinhaCurvaFisica(uid, idx) {
 function renderCurvaFisicaObra(o) {
   const dados = curvaFisicaDaObra(o);
   const linhas = dados.map((r,i)=>`<tr>
+    <td class="del-cell"><button class="delete-x-btn edit-only" onclick="excluirLinhaCurvaFisica('${o.uid}',${i})" title="Excluir linha">✕</button></td>
     <td><input type="date" value="${esc(r.data||'')}" onchange="atualizarCurvaFisica('${o.uid}',${i},'data',this.value)"></td>
     <td><input value="${esc(r.previsto??'')}" placeholder="0%" onchange="atualizarCurvaFisica('${o.uid}',${i},'previsto',this.value)"></td>
     <td><input value="${esc(r.real??'')}" placeholder="0%" onchange="atualizarCurvaFisica('${o.uid}',${i},'real',this.value)"></td>
     <td><input value="${esc(r.tendencia??'')}" placeholder="0%" onchange="atualizarCurvaFisica('${o.uid}',${i},'tendencia',this.value)"></td>
     <td><input value="${esc(r.hhPrevisto??'')}" placeholder="0,00" onchange="atualizarCurvaFisica('${o.uid}',${i},'hhPrevisto',this.value)"></td>
     <td><input value="${esc(r.hhReal??'')}" placeholder="0,00" onchange="atualizarCurvaFisica('${o.uid}',${i},'hhReal',this.value)"></td>
-    <td><button class="delete-btn edit-only" onclick="excluirLinhaCurvaFisica('${o.uid}',${i})">Excluir</button></td>
   </tr>`).join('');
   $('content').innerHTML = `
     <div class="obra-head">
@@ -1912,8 +2173,8 @@ function renderCurvaFisicaObra(o) {
         </div>
       </div>
       <div class="cronograma-table-wrap">
-        <table class="cronograma-table">
-          <thead><tr><th>DATA</th><th>% Previsto</th><th>% Real</th><th>% Tendência</th><th>HH Previsto</th><th>HH Real</th><th>AÇÕES</th></tr></thead>
+        <table class="cronograma-table curva-table curva-fisica-table">
+          <thead><tr><th class="del-cell"></th><th>DATA</th><th>% Previsto</th><th>% Real</th><th>% Tendência</th><th>HH Previsto</th><th>HH Real</th></tr></thead>
           <tbody>${linhas||'<tr><td colspan="7" style="text-align:center;color:#64748b;font-weight:800;padding:1rem">Nenhum dado cadastrado.</td></tr>'}</tbody>
         </table>
       </div>
@@ -2378,6 +2639,7 @@ function excluirLinhaCurvaFinanceira(uid, i) {
 function renderCurvaFinanceiraObra(o) {
   const dados = curvaFinanceiraDaObra(o);
   const linhas = dados.map((r,i)=>`<tr>
+    <td class="del-cell"><button class="delete-x-btn edit-only" onclick="excluirLinhaCurvaFinanceira('${o.uid}',${i})" title="Excluir linha">✕</button></td>
     <td><input type="date" value="${esc(r.data||'')}" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'data',this.value)"></td>
     <td><input value="${esc(r.previstoAc??r.previsto??'')}" placeholder="%" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'previstoAc',this.value)"></td>
     <td><input value="${esc(r.realAc??r.real??'')}" placeholder="%" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'realAc',this.value)"></td>
@@ -2385,7 +2647,6 @@ function renderCurvaFinanceiraObra(o) {
     <td><input value="${esc(r.rsPrevisto||'')}" placeholder="0" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'rsPrevisto',this.value)"></td>
     <td><input value="${esc(r.rsReal||'')}" placeholder="0" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'rsReal',this.value)"></td>
     <td><input value="${esc(r.rsTendencia||'')}" placeholder="0" onchange="atualizarCurvaFinanceira('${o.uid}',${i},'rsTendencia',this.value)"></td>
-    <td><button class="delete-row-btn edit-only" onclick="excluirLinhaCurvaFinanceira('${o.uid}',${i})">Excluir</button></td>
   </tr>`).join('');
   $('content').innerHTML = `
     <div class="obra-head">
@@ -2403,8 +2664,8 @@ function renderCurvaFinanceiraObra(o) {
         </div>
       </div>
       <div class="cronograma-table-wrap">
-        <table class="cronograma-table">
-          <thead><tr><th>DATA</th><th>% Previsto Ac.</th><th>% Real Ac.</th><th>% Tendência</th><th>R$ Previsto</th><th>R$ Real</th><th>R$ Tendência</th><th>AÇÕES</th></tr></thead>
+        <table class="cronograma-table curva-table curva-financeira-table">
+          <thead><tr><th class="del-cell"></th><th>DATA</th><th>% Previsto Ac.</th><th>% Real Ac.</th><th>% Tendência</th><th>R$ Previsto</th><th>R$ Real</th><th>R$ Tendência</th></tr></thead>
           <tbody>${linhas||'<tr><td colspan="8" style="text-align:center;color:#64748b;padding:1rem">Nenhum dado cadastrado.</td></tr>'}</tbody>
         </table>
       </div>
