@@ -235,9 +235,11 @@
     .add-row-btn.default-btn { background: #eef6ff; color: #064fe0; border: 1px solid #bfdbfe; }
     .add-row-btn.import-btn { background: #064fe0; color: #fff; border: 1px solid #064fe0; }
     .cronograma-table-wrap { width: 100%; overflow: auto; border: 1px solid #d7e6f8; border-radius: .75rem; max-height: 68vh; background: white; }
-    .cronograma-table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: .68rem; }
+    .cronograma-table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: .68rem; }
     .cronograma-table th { position: sticky; top: 0; z-index: 2; background: linear-gradient(180deg,#eef5fd,#e4f0fb); color: #1e3a6e; font-size: .6rem; text-transform: uppercase; letter-spacing: .02em; padding: 0; border: 1px solid #d3e2f3; border-top: 0; font-weight: 800; height: 2rem; }
     .th-flex { display: flex; align-items: center; justify-content: space-between; gap: .15rem; height: 100%; padding: 0 .3rem; }
+    .col-resizer { position: absolute; top: 0; right: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 3; }
+    .col-resizer:hover { background: #93c5fd; }
     .th-flex span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .th-filter-btn { flex: 0 0 auto; border: 0; background: transparent; color: #5e7ba8; font-size: .6rem; cursor: pointer; padding: .1rem .2rem; border-radius: .2rem; line-height: 1; }
     .th-filter-btn:hover { background: #d6e6fb; color: #073b8e; }
@@ -271,16 +273,21 @@
     .curva-table th:nth-child(2), .curva-table td:nth-child(2) { width: 7rem; min-width: 7rem; max-width: 7rem; }
     .curva-table th:nth-child(n+3), .curva-table td:nth-child(n+3) { width: 7.5rem; min-width: 6rem; }
     .curva-table th:nth-child(2), .curva-table td:nth-child(2) { text-align: center; }
-    .cronograma-table th:nth-child(2), .cronograma-table td:nth-child(2) { width: 2.4rem; min-width: 2.4rem; }
-    .cronograma-table th:nth-child(3), .cronograma-table td:nth-child(3) { width: 4rem; min-width: 4rem; max-width: 4rem; }
-    .cronograma-table th:nth-child(4), .cronograma-table td:nth-child(4) { width: 13rem; min-width: 10rem; }
-    .cronograma-table th:nth-child(5), .cronograma-table td:nth-child(5) { width: 3.6rem; min-width: 3.6rem; max-width: 3.6rem; }
-    .cronograma-table th:nth-child(6), .cronograma-table td:nth-child(6),
-    .cronograma-table th:nth-child(7), .cronograma-table td:nth-child(7),
-    .cronograma-table th:nth-child(10), .cronograma-table td:nth-child(10),
-    .cronograma-table th:nth-child(11), .cronograma-table td:nth-child(11) { width: 5.6rem; min-width: 5.6rem; max-width: 5.6rem; }
-    .cronograma-table th:nth-child(8), .cronograma-table td:nth-child(8) { width: 4.4rem; min-width: 4.4rem; max-width: 4.4rem; }
-    .cronograma-table th:nth-child(9), .cronograma-table td:nth-child(9) { width: 3.6rem; min-width: 3.6rem; max-width: 3.6rem; }
+    /* Larguras das colunas do Cronograma agora são controladas pelo <colgroup> (redimensionável manualmente) */
+    .real-cell { background: #f7fdf9; }
+    .cronograma-table th.real-cell { background: linear-gradient(180deg,#eafbf0,#dcf5e6); color: #166534; }
+    .cronograma-table td.real-cell input { color: #166534; font-weight: 700; }
+    .fase-badge { display: inline-block; margin-top: .5rem; padding: .3rem .7rem; border-radius: .4rem; font-size: .72rem; font-weight: 800; }
+    .fase-elaboracao { background: #fef3c7; color: #92400e; }
+    .fase-controle { background: #dcfce7; color: #166534; }
+    .travar-btn { background: #166534 !important; color: #fff !important; }
+    .reabrir-btn { background: #92400e !important; color: #fff !important; }
+    .reprog-controle { display: inline-flex; align-items: center; gap: .4rem; background: #eef6ff; border: 1px solid #bfdbfe; border-radius: .55rem; padding: .25rem .4rem; }
+    .reprog-controle input[type="date"] { height: 2.1rem; border: 1px solid #bfdbfe; border-radius: .4rem; padding: 0 .4rem; font-size: .8rem; }
+    .reprog-btn { background: #2563eb !important; color: #fff !important; }
+    .lb-locked { background: #eef2f7 !important; }
+    .lb-locked input { background: transparent !important; color: #64748b !important; }
+    .lb-locked input:disabled { cursor: not-allowed; }
 
     /* Painel de filtro estilo Excel/MS Project */
     .filtro-coluna-panel { display: none; flex-direction: column; position: fixed; width: 210px; max-height: 280px; background: #fff; border: 1px solid #c8d9ec; border-radius: .55rem; box-shadow: 0 .6rem 1.6rem rgba(15,23,42,.25); z-index: 10000; font-size: .72rem; overflow: hidden; }
@@ -349,7 +356,9 @@
     .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(8), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(8),
     .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(9), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(9),
     .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(10), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(10),
-    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(11), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(11) { display: none; }
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(11), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(11),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(12), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(12),
+    .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(13), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(13) { display: none; }
     .cronograma-table-wrap.cronograma-compacto .cronograma-table th:nth-child(4), .cronograma-table-wrap.cronograma-compacto .cronograma-table td:nth-child(4) { width: 16rem; min-width: 16rem; }
 
     .gantt-side-header { position: sticky; top: 0; z-index: 2; height: 2.15rem; background: #eaf4ff; border-bottom: 1px solid #d7e6f8; min-width: var(--gantt-width,640px); }
@@ -1451,7 +1460,80 @@ function maiorDataCronograma(lista, campo) {
 function recalcularCronogramaItem(item) {
   if(validarEAP(item.eap)) item.nivel = calcularNivelPorEAP(item.eap);
   item.duracaoLB = duracaoPorDatas(item.inicioLB, item.terminoLB) || '';
-  item.duracao = duracaoPorDatas(item.inicio, item.termino) || '';
+
+  // Se o avanço voltou a zero, a atividade não começou de fato — limpa o Início Real.
+  if(Number(item.avancoFisico||0) <= 0 && item.inicioReal) {
+    item.inicioReal = '';
+  }
+  // Início Real é espelhado a partir do Início Planejado automaticamente quando a atividade tem avanço > 0
+  // (indica que ela de fato começou — e isso passa a impedir a reprogramação dela).
+  if(Number(item.avancoFisico||0) > 0 && !item.inicioReal && item.inicio) {
+    item.inicioReal = item.inicio;
+  }
+  // Se o avanço caiu abaixo de 100%, a atividade não está mais concluída — limpa o Término Real.
+  if(Number(item.avancoFisico||0) < 100 && item.terminoReal) {
+    item.terminoReal = '';
+  }
+  // Término Real é espelhado a partir do Término Planejado quando a atividade atinge 100%.
+  if(Number(item.avancoFisico||0) >= 100 && !item.terminoReal && item.termino) {
+    item.terminoReal = item.termino;
+  }
+  // Se o usuário sobrescrever o Término Real com uma data diferente do Término Planejado,
+  // isso é um fechamento manual: o Planejado se ajusta para refletir a data real informada,
+  // e SÓ NESSE CASO a Duração Planejada é recalculada a partir das novas datas.
+  if(item.terminoReal && item.terminoReal !== item.termino) {
+    item.termino = item.terminoReal;
+    const novaDuracao = duracaoPorDatas(item.inicio, item.termino);
+    if(novaDuracao) item.duracao = novaDuracao;
+  }
+}
+
+function reprogramarCronograma(o, dataReprog) {
+  const dados = cronogramaDaObra(o);
+  let mudou = false;
+  dados.forEach(item => {
+    if(item.isResumo) return;
+    const avanco = Number(item.avancoFisico||0);
+
+    if(!item.inicioReal && avanco <= 0) {
+      // Não começou de fato: empurra o Início Planejado para a data de reprogramação, mantendo a duração.
+      if(!item.inicio || item.inicio >= dataReprog) return;
+      const dur = Number(item.duracao || item.duracaoLB || 1) || 1;
+      item.inicio = dataReprog;
+      const fim = new Date(dataReprog+'T00:00:00');
+      fim.setDate(fim.getDate() + Math.max(0, dur-1));
+      item.termino = fim.toISOString().slice(0,10);
+      mudou = true;
+    } else if(item.inicioReal && avanco > 0 && avanco < 100 && !item.terminoReal) {
+      // Em andamento (já começou, ainda não terminou): empurra só o Término Planejado para a data de reprogramação.
+      if(!item.termino || item.termino >= dataReprog) return;
+      item.termino = dataReprog;
+      const novaDuracao = duracaoPorDatas(item.inicio, item.termino);
+      if(novaDuracao) item.duracao = novaDuracao;
+      mudou = true;
+    }
+  });
+  return mudou;
+}
+
+function executarReprogramacaoCronograma(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  const input = document.getElementById('dataReprogramacaoInput');
+  const data = input ? input.value : '';
+  if(!data) { alert('Selecione a data de reprogramação.'); return; }
+  if(!confirm(`Isso vai reprogramar para ${fmt(data)}:\n• Atividades não iniciadas (sem Início Real e sem avanço) com início previsto antes dessa data → Início Planejado é empurrado, mantendo a duração.\n• Atividades em andamento (com avanço, sem Término Real) com término previsto antes dessa data → Término Planejado é empurrado até essa data.\nContinuar?`)) return;
+  salvarSnapshotCronograma(o);
+  const dados = cronogramaDaObra(o);
+  const mudou = reprogramarCronograma(o, data);
+  dados.forEach(recalcularCronogramaItem);
+  recalcularResumosCronograma(dados);
+  o.base.arquivos.cronograma.registros = dados.length;
+  salvarLocal();
+  renderCronogramaObra(o);
+  renderizarArvore();
+  if(!mudou) setTimeout(() => alert('Nenhuma atividade precisava ser reprogramada para essa data.'), 100);
 }
 
 function recalcularResumosCronograma(dados) {
@@ -1511,6 +1593,36 @@ function adicionarLinhaCronograma(uid) {
   renderizarArvore();
 }
 
+function salvarSnapshotCronograma(o) {
+  window._cronogramaUndoStack = window._cronogramaUndoStack || {};
+  const pilha = window._cronogramaUndoStack[o.uid] || (window._cronogramaUndoStack[o.uid] = []);
+  pilha.push(JSON.stringify(cronogramaDaObra(o)));
+  if(pilha.length > 20) pilha.shift();
+}
+
+function desfazerCronograma(uid) {
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  const pilha = (window._cronogramaUndoStack||{})[uid];
+  if(!pilha || !pilha.length) return;
+  const anterior = JSON.parse(pilha.pop());
+  o.base.arquivos.cronograma.dados = anterior;
+  o.base.arquivos.cronograma.registros = anterior.length;
+  salvarLocal();
+  renderCronogramaObra(o);
+  renderizarArvore();
+}
+
+document.addEventListener('keydown', (e) => {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+    const ctx = window._cronogramaCtxAtual;
+    if(ctx && document.querySelector('.cronograma-table')) {
+      e.preventDefault();
+      desfazerCronograma(ctx.uid);
+    }
+  }
+});
+
 function atualizarCronograma(uid, idx, campo, valor) {
   if(!podeEditar()) return;
   const o = obras.find(x => x.uid===uid);
@@ -1518,24 +1630,36 @@ function atualizarCronograma(uid, idx, campo, valor) {
   const dados = cronogramaDaObra(o);
   const item = dados[idx];
   if(!item) return;
+  salvarSnapshotCronograma(o);
   if(campo === 'avancoFisico') {
     let n = Number(valor||0);
     if(isNaN(n)) n=0;
     n = Math.max(0, Math.min(100, n));
     item[campo] = n;
+  } else if(campo === 'duracao') {
+    let n = Number(valor||0);
+    if(isNaN(n) || n<0) n = 0;
+    item.duracao = n;
+    if(item.inicio && n>0) {
+      const fim = new Date(item.inicio+'T00:00:00');
+      fim.setDate(fim.getDate() + (n-1));
+      item.termino = fim.toISOString().slice(0,10);
+    }
+  } else if(campo === 'terminoReal') {
+    item.terminoReal = valor;
+    if(valor) item.avancoFisico = 100; // término real definido manualmente => atividade concluída
   } else {
     item[campo] = valor;
   }
   recalcularCronogramaItem(item);
-  const sx = document.querySelector('.cronograma-table-wrap')?.scrollLeft || 0;
-  const sy = document.querySelector('.main')?.scrollTop || 0;
+  const wrapAntes = document.querySelector('.cronograma-table-wrap');
+  const sx = wrapAntes?.scrollLeft || 0;
+  const sy = wrapAntes?.scrollTop || 0;
   ordenarCronograma(o);
   renderCronogramaObra(o);
   setTimeout(() => {
     const w = document.querySelector('.cronograma-table-wrap');
-    if(w) w.scrollLeft = sx;
-    const m = document.querySelector('.main');
-    if(m) m.scrollTop = sy;
+    if(w) { w.scrollLeft = sx; w.scrollTop = sy; }
   }, 0);
 }
 
@@ -1616,7 +1740,53 @@ function renderGanttLateralCronograma(atividades, resumo, monthWidth) {
 }
 
 
+const LARGURAS_PADRAO_CRONOGRAMA = { 1:2.5, 2:3.6, 3:6.1, 4:19.7, 5:5.5, 6:8.5, 7:8.5, 8:6.6, 9:5.5, 10:8.5, 11:8.5, 12:8.2, 13:8.2 };
+
+function gerarColgroupCronograma() {
+  window._cronogramaColWidths = window._cronogramaColWidths || {};
+  let html = '';
+  for(let i=1; i<=13; i++) {
+    const w = window._cronogramaColWidths[i] || LARGURAS_PADRAO_CRONOGRAMA[i];
+    html += `<col data-col="${i}" style="width:${w}%">`;
+  }
+  return html;
+}
+
+function iniciarRedimensionarColuna(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  const col = Number(e.currentTarget.dataset.col);
+  const tabela = document.getElementById('cronogramaTabelaPrincipal');
+  if(!tabela) return;
+  const colEl = tabela.querySelector(`colgroup col[data-col="${col}"]`);
+  const colVizinhoEl = tabela.querySelector(`colgroup col[data-col="${col+1}"]`);
+  if(!colEl) return;
+  window._cronogramaColWidths = window._cronogramaColWidths || {};
+  const larguraTabelaPx = tabela.querySelector('tbody').offsetWidth || tabela.offsetWidth;
+  const startX = e.clientX;
+  const startPct = window._cronogramaColWidths[col] || LARGURAS_PADRAO_CRONOGRAMA[col];
+  const startPctVizinho = colVizinhoEl ? (window._cronogramaColWidths[col+1] || LARGURAS_PADRAO_CRONOGRAMA[col+1]) : null;
+  function mover(ev) {
+    const deltaPct = ((ev.clientX - startX) / larguraTabelaPx) * 100;
+    const novaPct = Math.max(1.5, startPct + deltaPct);
+    colEl.style.width = novaPct + '%';
+    window._cronogramaColWidths[col] = novaPct;
+    if(colVizinhoEl) {
+      const novaPctVizinho = Math.max(1.5, startPctVizinho - deltaPct);
+      colVizinhoEl.style.width = novaPctVizinho + '%';
+      window._cronogramaColWidths[col+1] = novaPctVizinho;
+    }
+  }
+  function soltar() {
+    document.removeEventListener('mousemove', mover);
+    document.removeEventListener('mouseup', soltar);
+  }
+  document.addEventListener('mousemove', mover);
+  document.addEventListener('mouseup', soltar);
+}
+
 function renderCronogramaObra(o) {
+  if(!o.faseCronograma) o.faseCronograma = 'elaboracao';
   ordenarCronograma(o);
   const dados = cronogramaDaObra(o);
   const res = resumoCronograma(o);
@@ -1624,29 +1794,35 @@ function renderCronogramaObra(o) {
   window._cronogramaCtxAtual = { dados, uid: o.uid };
   const g = calcularBarrasGantt(dados, res, 65);
   const gw = g ? g.ganttWidth : 640;
+  const emControle = o.faseCronograma === 'controle';
 
   const colGantt = (i) => `<td class="gantt-col-td"><div class="gantt-table-cell" style="width:${gw}px">${g?(i===-1?g.barrasResumo:g.barrasPorLinha[i]):''}</div></td>`;
 
   const linhasTabela = dados.length ? dados.map((r,i) => {
     const isRes = !!r.isResumo;
     const dis = isRes || !podeEditar() ? 'disabled' : '';
+    const disLB = isRes || !podeEditar() || emControle ? 'disabled' : '';
+    const disReal = isRes || !podeEditar() || !emControle ? 'disabled' : '';
+    const lock = emControle ? 'lb-locked' : '';
     const nivel = calcularNivelPorEAP(r.eap||'1');
     return `<tr data-idx="${i}" class="${isRes?'cronograma-resumo-eap':''}">
       <td class="del-cell"><button class="delete-x-btn edit-only" onclick="excluirLinhaCronograma('${o.uid}',${i})" title="Excluir linha">✕</button></td>
-      <td class="nivel-cell"><input class="readonly-input" disabled type="number" value="${esc(nivel)}"></td>
-      <td class="eap-cell"><input value="${esc(r.eap||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'eap',this.value)"></td>
-      <td><input style="padding-left:${Math.max(0,nivel-1)*1.1}rem" value="${esc(r.descricao||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'descricao',this.value)"></td>
-      <td><div class="duration-wrap"><input class="readonly-input" disabled type="number" value="${esc(r.duracaoLB||'')}"><span class="duration-suffix">d</span></div></td>
-      <td class="date-cell"><input ${dis} type="date" value="${esc(r.inicioLB||'')}" onblur="atualizarCronograma('${o.uid}',${i},'inicioLB',this.value)"></td>
-      <td class="date-cell"><input ${dis} type="date" value="${esc(r.terminoLB||'')}" onblur="atualizarCronograma('${o.uid}',${i},'terminoLB',this.value)"></td>
+      <td class="nivel-cell ${lock}"><input class="readonly-input" disabled type="number" value="${esc(nivel)}"></td>
+      <td class="eap-cell ${lock}"><input ${disLB} value="${esc(r.eap||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'eap',this.value)"></td>
+      <td class="${lock}"><input ${disLB} style="padding-left:${Math.max(0,nivel-1)*1.1}rem" value="${esc(r.descricao||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'descricao',this.value)"></td>
+      <td class="${lock}"><div class="duration-wrap"><input class="readonly-input" disabled type="number" value="${esc(r.duracaoLB||'')}"><span class="duration-suffix">d</span></div></td>
+      <td class="date-cell ${lock}"><input ${disLB} type="date" value="${esc(r.inicioLB||'')}" onblur="atualizarCronograma('${o.uid}',${i},'inicioLB',this.value)"></td>
+      <td class="date-cell ${lock}"><input ${disLB} type="date" value="${esc(r.terminoLB||'')}" onblur="atualizarCronograma('${o.uid}',${i},'terminoLB',this.value)"></td>
       <td><div class="percent-wrap"><input ${dis} type="number" min="0" max="100" step="0.01" placeholder="0" value="${esc(r.avancoFisico||0)}" oninput="if(Number(this.value)>100)this.value=100;if(Number(this.value)<0)this.value=0" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'avancoFisico',this.value)"><span class="percent-suffix">%</span></div></td>
-      <td><div class="duration-wrap"><input class="readonly-input" disabled type="number" value="${esc(r.duracao||'')}"><span class="duration-suffix">d</span></div></td>
+      <td><div class="duration-wrap"><input ${dis} type="number" min="0" step="1" value="${esc(r.duracao||'')}" onkeydown="if(event.key==='Enter')this.blur()" onblur="atualizarCronograma('${o.uid}',${i},'duracao',this.value)"><span class="duration-suffix">d</span></div></td>
       <td class="date-cell"><input ${dis} type="date" value="${esc(r.inicio||'')}" onblur="atualizarCronograma('${o.uid}',${i},'inicio',this.value)"></td>
       <td class="date-cell"><input ${dis} type="date" value="${esc(r.termino||'')}" onblur="atualizarCronograma('${o.uid}',${i},'termino',this.value)"></td>
+      <td class="date-cell real-cell"><input ${disReal} type="date" value="${esc(r.inicioReal||'')}" title="Apontamento real (campo/mobile)" onblur="atualizarCronograma('${o.uid}',${i},'inicioReal',this.value)"></td>
+      <td class="date-cell real-cell"><input ${disReal} type="date" value="${esc(r.terminoReal||'')}" title="Apontamento real (campo/mobile)" onblur="atualizarCronograma('${o.uid}',${i},'terminoReal',this.value)"></td>
       <td class="gantt-divisor-td"></td>
       ${colGantt(i)}
     </tr>`;
-  }).join('') : `<tr><td colspan="12" style="text-align:center;color:#64748b;padding:1.5rem">Nenhuma atividade cadastrada.</td><td class="gantt-col-td"></td></tr>`;
+  }).join('') : `<tr><td colspan="14" style="text-align:center;color:#64748b;padding:1.5rem">Nenhuma atividade cadastrada.</td><td class="gantt-col-td"></td></tr>`;
 
   $('content').innerHTML = `
     <div class="obra-head">
@@ -1658,18 +1834,28 @@ function renderCronogramaObra(o) {
     </div>
     <div class="cronograma-panel">
       <div class="cronograma-head">
-        <div><h2>CRONOGRAMA DA OBRA</h2><p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada — Gantt integrado, estilo MS Project. Arraste a seta ‹ para mais espaço no Gantt.</p></div>
+        <div>
+          <h2>CRONOGRAMA DA OBRA</h2>
+          <p style="color:#64748b;margin-top:.25rem">Banco individual vinculado à obra selecionada — Gantt integrado, estilo MS Project. Arraste a seta ‹ para mais espaço no Gantt.</p>
+          <span class="fase-badge ${emControle?'fase-controle':'fase-elaboracao'}">${emControle?'🔒 Em Controle — Linha de Base travada':'✏️ Em Elaboração'}</span>
+        </div>
         <div class="cronograma-actions-right">
-          ${podeEditar()?`<button class="add-row-btn" class="edit-only-wrap" onclick="adicionarLinhaCronograma('${o.uid}')">＋ Adicionar Linha</button><button class="add-row-btn import-btn" class="edit-only-wrap" onclick="selecionarImportacaoCronograma('${o.uid}')">Importar Cronograma</button><button class="add-row-btn clear-btn" class="edit-only-wrap" onclick="limparCronograma('${o.uid}')">🗑 Limpar Dados</button>`:''}<button class="add-row-btn default-btn" onclick="baixarModeloDefaultCronograma()">Baixar Modelo Default</button>
+          ${podeEditar()?`<button class="add-row-btn" class="edit-only-wrap" onclick="adicionarLinhaCronograma('${o.uid}')">＋ Adicionar Linha</button><button class="add-row-btn undo-btn" onclick="desfazerCronograma('${o.uid}')" title="Desfazer última alteração (Ctrl+Z)">↶ Desfazer</button><button class="add-row-btn import-btn" class="edit-only-wrap" onclick="selecionarImportacaoCronograma('${o.uid}')">Importar Cronograma</button><button class="add-row-btn clear-btn" class="edit-only-wrap" onclick="limparCronograma('${o.uid}')">🗑 Limpar Dados</button>`:''}<button class="add-row-btn default-btn" onclick="baixarModeloDefaultCronograma()">Baixar Modelo Default</button>
+          ${podeEditar()?(emControle
+            ? `<button class="add-row-btn reabrir-btn" onclick="reabrirElaboracaoCronograma('${o.uid}')" title="Volta a permitir edição livre da Linha de Base">🔓 Reabrir Elaboração</button>`
+            : `<button class="add-row-btn travar-btn" onclick="travarLinhaBaseCronograma('${o.uid}')" title="Trava a Linha de Base e ativa o controle com apontamento Real">🔒 Fechar Linha de Base / Iniciar Controle</button>`):''}
+          ${podeEditar()&&emControle?`<span class="reprog-controle"><input type="date" id="dataReprogramacaoInput" value="${new Date().toISOString().slice(0,10)}"><button class="add-row-btn reprog-btn" onclick="executarReprogramacaoCronograma('${o.uid}')" title="Empurra para a data escolhida as atividades não iniciadas que estavam previstas para antes dela">📅 Reprogramar</button></span>`:''}
           <input id="cronogramaImportInput" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarCronogramaExcel(event,'${o.uid}')">
         </div>
       </div>
       <div class="cronograma-table-wrap">
-        <table class="cronograma-table">
+        <table class="cronograma-table" id="cronogramaTabelaPrincipal">
+          <colgroup>${gerarColgroupCronograma()}</colgroup>
           <thead>
             <tr>
               <th class="del-cell"></th>
-              ${['NÍV','EAP','DESCRIÇÃO','DUR LB','INÍCIO LB','TÉRM LB','AV.FÍS%','DURAÇÃO','INÍCIO','TÉRMINO'].map((lbl,i)=>`<th><div class="th-flex"><span>${lbl}</span><button class="th-filter-btn" data-col="${i+1}" onclick="abrirFiltroColuna(event,${i+1})" title="Filtrar">▾</button></div></th>`).join('')}
+              ${['NÍV','EAP','DESCRIÇÃO','DUR LB','INÍCIO LB','TÉRM LB','AV.FÍS%','DUR. PLAN','INÍCIO PLAN','TÉRM. PLAN'].map((lbl,i)=>`<th><div class="th-flex"><span>${lbl}</span><button class="th-filter-btn" data-col="${i+1}" onclick="abrirFiltroColuna(event,${i+1})" title="Filtrar">▾</button></div><div class="col-resizer" data-col="${i+2}" onmousedown="iniciarRedimensionarColuna(event)"></div></th>`).join('')}
+              <th class="real-cell">INÍCIO REAL<div class="col-resizer" data-col="12" onmousedown="iniciarRedimensionarColuna(event)"></div></th><th class="real-cell">TÉRM. REAL<div class="col-resizer" data-col="13" onmousedown="iniciarRedimensionarColuna(event)"></div></th>
               <th class="gantt-divisor-th"><div class="gantt-divisor-handle" onmousedown="iniciarArrasteGantt(event)" title="Arraste para redimensionar"><span class="gantt-divisor-btn" onmousedown="event.stopPropagation()" onclick="toggleCompactarCronograma(event)" title="Expandir/recolher área do Gantt">‹</span></div></th>
               <th class="gantt-col-th"><div class="gantt-table-header" style="width:${gw}px">${g?g.headerHtml:''}</div></th>
             </tr>
@@ -1681,6 +1867,7 @@ function renderCronogramaObra(o) {
               <td>${celResumo('0')}</td><td>${celResumo('0')}</td><td>${celResumo(res.descricao)}</td>
               <td>${celResumo(res.duracaoLB?res.duracaoLB+' d':'')}</td><td>${celResumo(res.inicioLB?fmt(res.inicioLB):'')}</td><td>${celResumo(res.terminoLB?fmt(res.terminoLB):'')}</td>
               <td>${celResumo(res.avancoFisico,'percent')}</td><td>${celResumo(res.duracao?res.duracao+' d':'')}</td><td>${celResumo(res.inicio?fmt(res.inicio):'')}</td><td>${celResumo(res.termino?fmt(res.termino):'')}</td>
+              <td class="real-cell">—</td><td class="real-cell">—</td>
               <td class="gantt-divisor-td"></td>
               ${colGantt(-1)}
             </tr>
@@ -1690,6 +1877,28 @@ function renderCronogramaObra(o) {
       </div>
     </div>`;
   setTimeout(() => { filtrarCronogramaTabela(); atualizarIconesFiltroAtivos(); }, 0);
+}
+
+function travarLinhaBaseCronograma(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  if(!confirm('Isso trava a edição livre da Linha de Base e ativa o modo Controle (com apontamento Real e escorregamento automático do Planejado). Deseja continuar?')) return;
+  o.faseCronograma = 'controle';
+  salvarLocal();
+  renderCronogramaObra(o);
+  renderizarArvore();
+}
+
+function reabrirElaboracaoCronograma(uid) {
+  if(!podeEditar()) return;
+  const o = obras.find(x => x.uid===uid);
+  if(!o) return;
+  if(!confirm('Isso volta o cronograma para Elaboração, permitindo editar a Linha de Base livremente novamente. Deseja continuar?')) return;
+  o.faseCronograma = 'elaboracao';
+  salvarLocal();
+  renderCronogramaObra(o);
+  renderizarArvore();
 }
 
 function obterValorColunaCronograma(r, idx, nivel) {
